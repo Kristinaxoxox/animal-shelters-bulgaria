@@ -1084,7 +1084,7 @@ const bulgariaBounds = L.latLngBounds(
   L.latLng(41.23, 22.35), L.latLng(44.22, 28.68)
 );
 const map = L.map('map', {
-  center: [42.7339, 25.4858], zoom: 7, minZoom: 7, maxZoom: 15,
+  center: [42.7339, 25.4858], zoom: 8, minZoom: 7, maxZoom: 15,
   maxBounds: bulgariaBounds, maxBoundsViscosity: 1.0
 });
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1307,7 +1307,7 @@ function buildCatalogue(list) {
       : '';
     const cardImgHtml = hasImgs
       ? `<div class="card-image-wrap" data-idx="${idx}" data-cur="0">
-           <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name}" onclick="event.stopPropagation();openLightbox(${galleryJson}, window._cardCur&&window._cardCur[${idx}]||0)">
+           <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name}" style="cursor:zoom-in;" onclick="event.stopPropagation();openCardLightbox(${idx})">
            ${arrows}${dots}
          </div>`
       : `<div class="card-image-placeholder">🐾</div>`;
@@ -1342,10 +1342,10 @@ function buildCatalogue(list) {
             </div>
           </div>
 
-          <div class="card-back">
+          <div class="card-back" onclick="openPanel(${idx})" style="cursor:pointer;">
             <div class="card-back-header">
               <div class="card-back-name">${s.name}</div>
-              <button class="card-flip-back-btn" onclick="flipCard(this.closest('.shelter-card'))">←</button>
+              <button class="card-flip-back-btn" onclick="event.stopPropagation();flipCard(this.closest('.shelter-card'))">←</button>
             </div>
             <div class="card-back-body">
               <div>
@@ -1355,7 +1355,7 @@ function buildCatalogue(list) {
               ${needsHtml}
               ${donateCardHtml}
               ${linksHtml}
-              <button class="card-open-panel-btn" onclick="event.stopPropagation();openPanel(${idx})">Виж пълен профил →</button>
+              <button class="card-open-panel-btn" onclick="openPanel(${idx})">Виж пълен профил →</button>
             </div>
           </div>
 
@@ -1552,6 +1552,12 @@ window.addEventListener('resize', () => {
 // ── Lightbox ──
 let _lbImages = [], _lbIndex = 0, _lbTouchX = 0;
 
+function openCardLightbox(shelterIdx) {
+  const s = shelters[shelterIdx];
+  if (!s.gallery || s.gallery.length === 0) return;
+  const cur = (window._cardCur && window._cardCur[shelterIdx]) || 0;
+  openLightbox(s.gallery, cur);
+}
 function openLightbox(images, startIndex) {
   _lbImages = typeof images === 'string' ? JSON.parse(images) : images;
   _lbIndex = startIndex;
