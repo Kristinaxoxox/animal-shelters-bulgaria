@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Приюти за животни в България</title>
+  <link rel="icon" type="image/png" href="tab-logo.png"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #fdf5ec;
+      color: #3a3a3a;
+    }
+
+    /* ══════════════════════════════════
+       HEADER
+    ══════════════════════════════════ */
+    header {
+      background: #cd6a18;
+      color: white;
+      padding: 10px 24px 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      overflow: visible;
+      position: relative;
+      z-index: 1000;
+    }
+    header img.logo {
+      height: 110px; width: auto; display: block;
+      margin-top: -20px; margin-bottom: -20px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .header-text { flex: 1; text-align: center; min-width: 0; }
+    header h1 {
+      font-size: 1.35rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    header p {
+      font-size: 0.85rem; opacity: 0.80;
+      margin-top: 4px; font-weight: 400; letter-spacing: 0.3px;
+    }
+
+    /* ══════════════════════════════════
+       CONTROLS BAR
+    ══════════════════════════════════ */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+      padding: 10px 20px;
+      background: #fdf5ec;
+      border-bottom: 1px solid #f5d4ae;
+      align-items: center;
+      position: relative;
+      z-index: 999;
+    }
+
+    /* Each label+input pair */
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-group label {
+      font-size: 0.82rem; font-weight: 600;
+      color: #cd6a18; white-space: nowrap; flex-shrink: 0;
+    }
+    .filter-group select,
+    .filter-group input {
+      padding: 6px 12px;
+      border: 1.5px solid #e8b07a;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      background: white; color: #3a3a3a;
+      outline: none; cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      min-width: 0;
+    }
+    .filter-group select:focus,
+    .filter-group input:focus { border-color: #cd6a18; }
+    .filter-group--search { flex: 1; min-width: 150px; }
+    .filter-group--search input { width: 100%; }
+
+    /* Right-side: count + toggle */
+    .controls-end {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .shelter-count {
+      font-size: 0.8rem; color: #888; white-space: nowrap;
+    }
+
+    /* View toggle */
+    .view-toggle {
+      display: flex;
+      border: 1.5px solid #e8b07a;
+      border-radius: 20px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .view-toggle button {
+      padding: 5px 14px;
+      border: none;
+      background: white;
+      color: #888;
+      font-size: 0.8rem; font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .view-toggle button.active { background: #cd6a18; color: white; }
+
+    /* ══════════════════════════════════
+       MAP
+    ══════════════════════════════════ */
+    html { height: 100%; }
+    body { height: 100%; overflow-y: auto; }
+    #map { height: calc(100svh - 115px); width: 100%; position: relative; }
+
+    /* Fullscreen map */
+    #map.map-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      height: 100% !important;
+      width: 100% !important;
+      z-index: 2000;
+    }
+
+    /* Fullscreen button */
+    #map-fullscreen-btn {
+      position: absolute;
+      top: 10px; right: 10px;
+      z-index: 1000;
+      background: white;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-radius: 6px;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.18);
+      transition: background 0.15s;
+      color: #444;
+    }
+    #map-fullscreen-btn:hover { background: #f5f5f5; }
+    /* Hide default Leaflet fullscreen if any */
+
+    /* ══════════════════════════════════
+       CATALOGUE
+    ══════════════════════════════════ */
+    #catalogue {
+      display: none;
+      padding: 24px;
+      padding-bottom: 60px;
+    }
+    #catalogue.visible { display: block; }
+
+    .catalogue-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ══════════════════════════════════
+       FLIP CARD
+    ══════════════════════════════════ */
+    .shelter-card {
+      perspective: 1200px;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+      cursor: pointer;
+      border-radius: 16px;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%; height: 100%;
+      transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+      transform-style: preserve-3d;
+    }
+    .shelter-card.flipped .card-inner { transform: rotateY(180deg); }
+
+    .card-front, .card-back {
+      position: absolute; inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-front {
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card-front:hover {
+      box-shadow: 0 6px 20px rgba(205,106,24,0.18);
+      transform: translateY(-3px);
+    }
+    .card-back {
+      transform: rotateY(180deg);
+      overflow-y: auto;
+    }
+
+    /* Card front content */
+    .card-image-wrap {
+      position: relative; width: 100%; height: 190px;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .card-image-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .card-image-placeholder {
+      width: 100%; height: 190px;
+      background: linear-gradient(135deg, #cd6a18 0%, #a85412 100%);
+      display: flex; align-items: center;
+      justify-content: center; font-size: 2.5rem;
+      flex-shrink: 0;
+    }
+    /* Card image nav arrows */
+    .card-img-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.45); color: white;
+      border: none; border-radius: 50%;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; cursor: pointer; z-index: 2;
+      opacity: 0; transition: opacity 0.2s;
+      padding: 0; line-height: 1;
+    }
+    .card-img-arrow.prev { left: 7px; }
+    .card-img-arrow.next { right: 7px; }
+    .card-image-wrap:hover .card-img-arrow { opacity: 1; }
+    .card-img-arrow:hover { background: rgba(0,0,0,0.7); }
+    /* Dot indicators */
+    .card-img-dots {
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 5px; z-index: 2;
+    }
+    .card-img-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .card-img-dot.active { background: white; }
+
+    .card-img-count {
+      position: absolute; bottom: 8px; right: 10px;
+      background: rgba(0,0,0,0.55); color: white;
+      font-size: 0.72rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+    }
+    .card-body { padding: 16px 18px 12px; flex: 1; display: flex; flex-direction: column; }
+    .card-name { font-size: 1rem; font-weight: 700; color: #cd6a18; margin-bottom: 4px; }
+    .card-city { font-size: 0.78rem; color: #888; margin-bottom: 10px; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .card-tag {
+      background: #fdf0e4; color: #cd6a18;
+      border: 1px solid #e8b07a;
+      border-radius: 12px; padding: 2px 10px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .card-row {
+      display: flex; align-items: flex-start;
+      gap: 8px; margin-bottom: 8px;
+      font-size: 0.82rem; color: #444; line-height: 1.5;
+    }
+    .card-row-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+    .card-spacer { flex: 1; min-height: 8px; }
+    .card-flip-hint {
+      font-size: 0.73rem; color: #cd6a18;
+      text-align: right; opacity: 0.75;
+      padding-top: 6px; font-weight: 600;
+    }
+
+    /* Card back content */
+    .card-back-header {
+      background: #cd6a18; color: white;
+      padding: 14px 16px;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 8px;
+      flex-shrink: 0;
+    }
+    .card-back-name { font-size: 0.95rem; font-weight: 700; line-height: 1.3; }
+    .card-flip-back-btn {
+      background: rgba(255,255,255,0.2); border: none; color: white;
+      width: 30px; height: 30px; border-radius: 50%;
+      font-size: 1rem; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .card-flip-back-btn:hover { background: rgba(255,255,255,0.35); }
+    .card-back-body {
+      padding: 14px 16px; flex: 1;
+      display: flex; flex-direction: column; gap: 12px;
+      overflow-y: auto;
+    }
+    .card-back-section-title {
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: #cd6a18; margin-bottom: 5px;
+    }
+    .card-needs-back { background: #fdf5ec; border-radius: 10px; padding: 10px 12px; }
+    .card-need-item {
+      font-size: 0.8rem; color: #555;
+      padding-left: 12px; position: relative;
+      margin-bottom: 3px; line-height: 1.4;
+    }
+    .card-need-item::before { content: '•'; color: #cd6a18; position: absolute; left: 0; }
+    .card-back-links { display: flex; flex-wrap: wrap; gap: 6px; }
+    .card-link {
+      padding: 5px 14px; border-radius: 10px;
+      text-decoration: none; font-size: 0.78rem; font-weight: 600;
+      transition: background 0.2s;
+    }
+    .card-link.primary { background: #cd6a18; color: white; }
+    .card-link.primary:hover { background: #a85412; }
+    .card-link.secondary { background: #f5d4ae; color: #a85412; }
+    .card-link.secondary:hover { background: #e8b07a; }
+    .card-open-panel-btn {
+      margin-top: auto;
+      padding: 9px 16px;
+      background: transparent; border: 1.5px solid #cd6a18;
+      border-radius: 10px; color: #cd6a18;
+      font-size: 0.82rem; font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer; transition: all 0.2s;
+      text-align: center; flex-shrink: 0;
+    }
+    .card-open-panel-btn:hover { background: #cd6a18; color: white; }
+
+    /* ══════════════════════════════════
+       MAP POPUP
+    ══════════════════════════════════ */
+    .leaflet-popup-content-wrapper {
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      border-top: 4px solid #cd6a18;
+      padding: 0; min-width: 230px;
+    }
+    .leaflet-popup-content { margin: 0; padding: 0; }
+    .popup-inner { padding: 14px 16px 12px; }
+    .popup-name { font-size: 0.95rem; font-weight: 700; color: #cd6a18; margin-bottom: 3px; }
+    .popup-city { font-size: 0.78rem; color: #888; margin-bottom: 10px; }
+    .popup-tag {
+      display: inline-block; background: #fdf0e4; color: #cd6a18;
+      border: 1px solid #e8b07a; border-radius: 12px;
+      padding: 2px 9px; font-size: 0.72rem; font-weight: 600;
+      margin: 2px 2px 2px 0;
+    }
+    .popup-days { margin-bottom: 10px; }
+    .popup-more-btn {
+      display: block; width: 100%; margin-top: 10px;
+      padding: 8px; background: #cd6a18; color: white;
+      border: none; border-radius: 10px;
+      font-size: 0.82rem; font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer; transition: background 0.2s; text-align: center;
+    }
+    .popup-more-btn:hover { background: #a85412; }
+
+    /* ══════════════════════════════════
+       SIDE PANEL
+    ══════════════════════════════════ */
+    #shelter-panel {
+      position: fixed;
+      top: 0; right: -480px;
+      width: 440px; max-width: 95vw; height: 100%;
+      background: white;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.18);
+      z-index: 2000;
+      transition: right 0.35s cubic-bezier(.4,0,.2,1);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    #shelter-panel.open { right: 0; }
+
+    #panel-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 1999; display: none;
+      backdrop-filter: blur(2px);
+    }
+    #panel-overlay.open { display: block; }
+
+    .panel-gallery { flex-shrink: 0; }
+    .panel-gallery-main { position: relative; width: 100%; height: 220px; overflow: hidden; }
+    .panel-gallery-main img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      transition: opacity 0.3s; cursor: zoom-in;
+    }
+    .panel-gallery-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.45); color: white;
+      border: none; width: 34px; height: 34px;
+      border-radius: 50%; font-size: 1rem;
+      cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: background 0.2s; z-index: 10;
+    }
+    .panel-gallery-arrow:hover { background: rgba(0,0,0,0.7); }
+    .panel-gallery-arrow.prev { left: 10px; }
+    .panel-gallery-arrow.next { right: 10px; }
+    .panel-gallery-counter {
+      position: absolute; bottom: 8px; right: 10px;
+      background: rgba(0,0,0,0.55); color: white;
+      font-size: 0.72rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+    }
+    .panel-gallery-thumbs {
+      display: flex; gap: 6px;
+      padding: 8px 10px; overflow-x: auto;
+      background: #f5f5f5;
+    }
+    .panel-gallery-thumbs img {
+      width: 56px; height: 42px;
+      object-fit: cover; border-radius: 6px;
+      cursor: pointer; opacity: 0.65;
+      border: 2px solid transparent;
+      transition: opacity 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .panel-gallery-thumbs img.active { opacity: 1; border-color: #cd6a18; }
+    .panel-img-placeholder {
+      width: 100%; height: 180px;
+      background: linear-gradient(135deg, #cd6a18 0%, #a85412 100%);
+      display: flex; align-items: center;
+      justify-content: center; font-size: 3rem;
+      flex-shrink: 0;
+    }
+    .panel-header {
+      background: #cd6a18; color: white;
+      padding: 18px 20px;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 10px;
+      flex-shrink: 0;
+    }
+    .panel-header-name { font-size: 1.1rem; font-weight: 700; line-height: 1.3; }
+    .panel-header-city { font-size: 0.8rem; opacity: 0.85; margin-top: 3px; }
+    .panel-close {
+      background: rgba(255,255,255,0.2); border: none; color: white;
+      width: 32px; height: 32px; border-radius: 50%;
+      font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .panel-close:hover { background: rgba(255,255,255,0.35); }
+    .panel-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .panel-section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #f5d4ae; }
+    .panel-section:last-child { border-bottom: none; margin-bottom: 0; }
+    .panel-section-title {
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: #cd6a18; margin-bottom: 8px;
+    }
+    .panel-section-body { font-size: 0.88rem; color: #444; line-height: 1.6; }
+    .panel-tag {
+      display: inline-block; background: #fdf0e4; color: #cd6a18;
+      border: 1px solid #e8b07a; border-radius: 12px;
+      padding: 3px 12px; font-size: 0.78rem; font-weight: 600;
+      margin: 3px 3px 3px 0;
+    }
+    .panel-need {
+      display: flex; align-items: flex-start;
+      gap: 8px; margin-bottom: 6px;
+      font-size: 0.85rem; color: #444;
+    }
+    .panel-need::before { content: '•'; color: #cd6a18; font-weight: 700; flex-shrink: 0; }
+    .panel-links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .panel-links a {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 16px; border-radius: 12px;
+      text-decoration: none; font-size: 0.82rem; font-weight: 600;
+      transition: background 0.2s;
+    }
+    .panel-links a.primary { background: #cd6a18; color: white; }
+    .panel-links a.primary:hover { background: #a85412; }
+    .panel-links a.secondary { background: #f5d4ae; color: #a85412; }
+    .panel-links a.secondary:hover { background: #e8b07a; }
+
+    /* ══════════════════════════════════
+       DONATE SECTION
+    ══════════════════════════════════ */
+    .donate-section {
+      background: #fff8f0;
+      border: 1.5px solid #f5d4ae;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-top: 2px;
+    }
+    .donate-section-title {
+      font-size: 0.78rem; font-weight: 700;
+      color: #cd6a18; text-transform: uppercase;
+      letter-spacing: 0.8px; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .donate-section-title::before { content: '💛'; font-size: 0.9rem; }
+    .donate-row {
+      display: flex; align-items: flex-start;
+      gap: 6px; margin-bottom: 6px;
+      font-size: 0.82rem; color: #444; line-height: 1.5;
+    }
+    .donate-label {
+      font-weight: 700; color: #888; font-size: 0.75rem;
+      min-width: 60px; flex-shrink: 0; padding-top: 1px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .donate-value {
+      font-family: 'Courier New', monospace; font-size: 0.82rem;
+      color: #3a3a3a; word-break: break-all;
+    }
+    .donate-link {
+      display: inline-block; padding: 6px 14px;
+      background: #cd6a18; color: white;
+      border-radius: 10px; text-decoration: none;
+      font-size: 0.78rem; font-weight: 600;
+      margin-top: 6px; margin-right: 6px;
+      transition: background 0.2s;
+    }
+    .donate-link:hover { background: #a85412; }
+    .donate-link.alt { background: #f5d4ae; color: #a85412; }
+    .donate-link.alt:hover { background: #e8b07a; }
+    /* card back donate */
+    .card-donate {
+      background: #fff8f0;
+      border: 1.5px solid #f5d4ae;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 6px;
+    }
+    .card-donate-title {
+      font-size: 0.72rem; font-weight: 700; color: #cd6a18;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 7px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .card-donate-title::before { content: '💛'; }
+    .card-donate-row {
+      font-size: 0.75rem; color: #555; margin-bottom: 4px;
+      display: flex; gap: 5px; align-items: flex-start; line-height: 1.4;
+    }
+    .card-donate-label {
+      font-weight: 700; color: #999; font-size: 0.68rem;
+      text-transform: uppercase; min-width: 52px; flex-shrink: 0; padding-top: 1px;
+    }
+    .card-donate-value {
+      font-family: 'Courier New', monospace; font-size: 0.75rem;
+      word-break: break-all; color: #3a3a3a;
+    }
+
+    /* ══════════════════════════════════
+       LIGHTBOX
+    ══════════════════════════════════ */
+    #lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92); z-index: 9999;
+      align-items: center; justify-content: center; flex-direction: column;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox-img {
+      max-width: 92vw; max-height: 82vh;
+      object-fit: contain; border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+      user-select: none; pointer-events: none;
+    }
+    #lightbox-counter {
+      color: rgba(255,255,255,0.7); font-size: 0.85rem;
+      margin-top: 14px; font-weight: 600; letter-spacing: 1px;
+    }
+    #lightbox-close {
+      position: fixed; top: 18px; right: 22px;
+      background: rgba(255,255,255,0.15); border: none; color: white;
+      width: 44px; height: 44px; border-radius: 50%; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    #lightbox-close:hover { background: rgba(255,255,255,0.3); }
+    .lightbox-arrow {
+      position: fixed; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.15); border: none; color: white;
+      width: 50px; height: 50px; border-radius: 50%; font-size: 1.6rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .lightbox-arrow:hover { background: rgba(255,255,255,0.3); }
+    #lightbox-prev { left: 16px; }
+    #lightbox-next { right: 16px; }
+    .expand-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(0,0,0,0.5); color: white;
+      border: none; border-radius: 8px;
+      padding: 5px 10px; font-size: 0.75rem; font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      transition: background 0.2s; z-index: 10;
+    }
+    .expand-btn:hover { background: rgba(0,0,0,0.8); }
+
+    /* ══════════════════════════════════
+       RESPONSIVE — TABLET  ≤ 900px
+    ══════════════════════════════════ */
+    @media (max-width: 900px) {
+      .catalogue-grid { grid-template-columns: repeat(2, 1fr); }
+      #shelter-panel { width: 380px; }
+    }
+
+    /* ══════════════════════════════════
+       RESPONSIVE — MOBILE  ≤ 640px
+    ══════════════════════════════════ */
+    @media (max-width: 640px) {
+
+      /* ── Header: slim strip ── */
+      header {
+        padding: 0 12px;
+        gap: 10px;
+        min-height: 52px;
+        overflow: hidden;
+      }
+      header img.logo {
+        height: 40px;
+        margin: 0;
+      }
+      .header-text { text-align: left; }
+      header h1 {
+        font-size: 0.88rem;
+        letter-spacing: 0;
+        line-height: 1.3;
+        text-transform: none;
+      }
+      /* Hide subtitle on mobile — saves two full lines */
+      header p { display: none; }
+
+      /* ── Controls: 2-col grid ── */
+      .controls {
+        padding: 10px 12px;
+        gap: 8px;
+      }
+      /* Город + Ден side by side */
+      .filter-group {
+        flex: 1;
+        min-width: calc(50% - 4px);
+      }
+      .filter-group label {
+        font-size: 0.75rem;
+        min-width: 32px;
+      }
+      .filter-group select {
+        flex: 1;
+        width: 100%;
+        font-size: 0.8rem;
+        padding: 7px 8px;
+      }
+      /* Search: full width */
+      .filter-group--search {
+        flex: none;
+        width: 100%;
+        min-width: 100%;
+      }
+      .filter-group--search input {
+        font-size: 0.82rem;
+        padding: 8px 14px;
+      }
+      /* Bottom row: count + toggle */
+      .controls-end {
+        width: 100%;
+        margin-left: 0;
+        justify-content: space-between;
+      }
+      .shelter-count { font-size: 0.75rem; }
+      .view-toggle button { font-size: 0.78rem; padding: 6px 12px; }
+
+      /* ── Map ── */
+      #map { height: calc(100svh - 136px); }
+      #map.map-fullscreen { height: 100% !important; }
+
+      /* ── Catalogue ── */
+      #catalogue { padding: 12px; }
+      .catalogue-grid { grid-template-columns: 1fr; gap: 14px; }
+
+      /* ── Catalogue cards ── */
+      .card-image-wrap { height: 170px; }
+      .card-img-arrow { opacity: 0.75; width: 32px; height: 32px; font-size: 1.1rem; }
+      .card-image-placeholder { height: 170px; }
+      .card-body { padding: 14px 14px 10px; }
+      .card-name { font-size: 0.95rem; }
+
+      /* ── Side panel: bottom sheet ── */
+      #shelter-panel {
+        top: auto;
+        bottom: -100vh;
+        right: 0; left: 0;
+        width: 100%; max-width: 100%;
+        height: 88svh;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+        transition: bottom 0.35s cubic-bezier(.4,0,.2,1);
+      }
+      #shelter-panel.open { bottom: 0; right: 0; }
+
+      /* Drag handle visual cue */
+      #shelter-panel::before {
+        content: '';
+        display: block;
+        width: 36px; height: 4px;
+        background: rgba(0,0,0,0.15);
+        border-radius: 2px;
+        margin: 10px auto 0;
+        flex-shrink: 0;
+      }
+
+      .panel-gallery-main { height: 200px; }
+
+      /* ── Lightbox ── */
+      #lightbox-img { max-width: 98vw; max-height: 72vh; }
+      #lightbox-prev { left: 6px; }
+      #lightbox-next { right: 6px; }
+      .lightbox-arrow { width: 42px; height: 42px; font-size: 1.4rem; }
+      #lightbox-close { top: 12px; right: 12px; width: 40px; height: 40px; }
+    }
+
+    /* ── Suggestion banner ── */
+    #suggestion-banner {
+      background: linear-gradient(90deg, #cd6a18 0%, #a85412 100%);
+      color: white;
+      padding: 10px 16px;
+      position: relative;
+      z-index: 998;
+      animation: slideDown 0.35s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .suggestion-inner {
+      display: flex; align-items: center;
+      gap: 10px; max-width: 1200px; margin: 0 auto;
+    }
+    .suggestion-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .suggestion-text { flex: 1; min-width: 0; }
+    .suggestion-title { font-size: 0.88rem; font-weight: 600; line-height: 1.3; }
+    .suggestion-title strong { font-weight: 700; }
+    .suggestion-sub { font-size: 0.73rem; opacity: 0.88; margin-top: 2px; }
+    .suggestion-btn {
+      background: white; color: #cd6a18;
+      border: none; border-radius: 10px;
+      padding: 6px 14px; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; font-family: 'Montserrat', sans-serif;
+      white-space: nowrap; flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .suggestion-btn:hover { opacity: 0.88; }
+    .suggestion-close {
+      background: rgba(255,255,255,0.2); border: none; color: white;
+      width: 28px; height: 28px; border-radius: 50%; font-size: 0.9rem;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; transition: background 0.2s;
+    }
+    .suggestion-close:hover { background: rgba(255,255,255,0.35); }
+
+    @media (max-width: 640px) {
+      .suggestion-title { font-size: 0.82rem; }
+      .suggestion-sub { font-size: 0.70rem; }
+      .suggestion-btn { padding: 5px 10px; font-size: 0.75rem; }
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: #2a1400;
+      color: rgba(255,255,255,0.55);
+      text-align: center;
+      padding: 12px 20px;
+      font-size: 0.75rem;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .footer-divider { opacity: 0.35; }
+    footer span:last-child { color: rgba(255,255,255,0.75); }
+
+    /* Very small phones */
+    @media (max-width: 360px) {
+      header h1 { font-size: 0.8rem; }
+      header p { display: none; }
+      header img.logo { height: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="logo_clean.png" alt="Меко и Приятелски" class="logo"
+       onclick="setView('map')" title="Обратно към картата"/>
+  <div class="header-text">
+    <h1>Приюти за животни в България</h1>
+    <p>Намери приют близо до теб и се запиши за разходка</p>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="filter-group">
+    <label for="cityFilter">Град</label>
+    <select id="cityFilter"><option value="all">Всички</option></select>
+  </div>
+
+  <div class="filter-group">
+    <label for="dayFilter">Ден</label>
+    <select id="dayFilter">
+      <option value="all">Всички дни</option>
+      <option value="Понеделник">Понеделник</option>
+      <option value="Вторник">Вторник</option>
+      <option value="Сряда">Сряда</option>
+      <option value="Четвъртък">Четвъртък</option>
+      <option value="Петък">Петък</option>
+      <option value="Събота">Събота</option>
+      <option value="Неделя">Неделя</option>
+    </select>
+  </div>
+
+  <div class="filter-group filter-group--search">
+    <label for="searchInput">Търси</label>
+    <input type="text" id="searchInput" placeholder="Град или приют..."/>
+  </div>
+
+  <div class="controls-end">
+    <span class="shelter-count" id="shelterCount"></span>
+    <div class="view-toggle">
+      <button id="btn-map" class="active" onclick="setView('map')">🗺 Карта</button>
+      <button id="btn-cat" onclick="setView('catalogue')">📋 Справочник</button>
+    </div>
+  </div>
+</div>
+
+<div id="map">
+  <button id="map-fullscreen-btn" title="Цял екран" onclick="toggleMapFullscreen()">⛶</button>
+</div>
+<div id="catalogue"></div>
+
+<footer>
+  <span>© 2025 Мечо и Приятели — срещу насилието над животни</span>
+  <span class="footer-divider">·</span>
+  <span>Изработено от Kristina B</span>
+</footer>
+
+<!-- Overlay + Side Panel -->
+<div id="panel-overlay"></div>
+<div id="shelter-panel">
+  <div id="panel-top-img"></div>
+  <div class="panel-header">
+    <div>
+      <div class="panel-header-name" id="panel-name"></div>
+      <div class="panel-header-city" id="panel-city"></div>
+    </div>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-arrow" id="lightbox-prev" onclick="lightboxNav(-1)">&#8249;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div id="lightbox-counter"></div>
+  <button class="lightbox-arrow" id="lightbox-next" onclick="lightboxNav(1)">&#8250;</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+
+// ============================================================
+//  SHELTER DATA
+// ============================================================
+const shelters = [
+  {
+    name: "Animal Help Mezdra",
+    city: "Мездра",
+    address: "гр. Мездра",
+    lat: 43.1422, lng: 23.7219,
+    walkDays: ["Събота", "Неделя"],
+    walkTime: "С предварителна уговорка",
+    walkInfo: "Пишете им директно във Facebook страницата за уговаряне на разходка. Доброволците се включват основно в игра с кучетата — всички животни се пускат всеки ден да тичат свободно в двора.",
+    needs: [
+      "Средства за покриване на сметки в клиниката",
+      "Консерви с храна за по-възрастни и болни кучета"
+    ],
+    gallery: ["images/mezdra1.jpg","images/mezdra2.jpg","images/mezdra3.jpg","images/mezdra4.jpg","images/mezdra5.jpg","images/mezdra6.jpg"],
+    phone: "", facebook: "https://www.facebook.com/AnimalHelpMezdra", website: "https://animalhelpmezdra.com",
+    donate: {
+      iban: "BG79UBBS88881000962248",
+      bic: "UBBSBGSF",
+      bank: "Обединена Българска Банка (ОББ)",
+      recipient: "СНЦОП В помощ на животните в Мездра",
+      note: "Дарение",
+      paypal: "https://www.paypal.com/donate?token=wZbfqvA2KnjjmPbAHQfxVRtOQMbdNwS8w2ybixLfou5oaY-YB9PwQSMvSY8JH86BBXyR-zjHkcfEy1o9",
+      revolut: "",
+      other: "https://animalhelpmezdra.com/donate"
+    }
+  },
+  {
+    name: "Общински приют Каменар",
+    city: "Варна",
+    address: "с. Каменар, обл. Варна",
+    lat: 43.2479, lng: 27.8442,
+    walkDays: ["Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота"],
+    walkTime: "10:00 – 16:00 (делнични), 10:00 – 14:00 (събота)",
+    walkInfo: "Приемаме доброволци всеки делничен ден от 10 до 16ч. и в събота от 10 до 14ч. В приюта има около 90 кучета — малки, големи, породисти и непородисти.",
+    needs: [
+      "Подобряване на материалната база — нови подови настилки в клетките",
+      "Нов окачен таван с вата за топлина през зимата",
+      "Боядисване на металните части на клетките"
+    ],
+    gallery: ["images/kamenar-1.jpg","images/kamenar-2.jpg","images/kamenar-3.jpg"],
+    phone: "0877507887", facebook: "https://www.facebook.com/people/%D0%9E%D0%B1%D1%89%D0%B8%D0%BD%D1%81%D0%BA%D0%B8-%D0%BF%D1%80%D0%B8%D1%8E%D1%82-%D0%B7%D0%B0-%D0%B1%D0%B5%D0%B7%D1%81%D1%82%D0%BE%D0%BF%D0%B0%D0%BD%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%B8-%D0%BA%D1%83%D1%87%D0%B5%D1%82%D0%B0-%D0%9E%D0%9F%D0%91%D0%9A-%D1%81%D0%9A%D0%B0%D0%BC%D0%B5%D0%BD%D0%B0%D1%80-%D0%9E%D1%84%D0%B8%D1%86%D0%B8%D0%B0%D0%BB%D0%BD%D0%B0-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0/100080598330005/", website: "https://opbk.varna.bg/",
+    donate: {
+      iban: "",
+      bic: "",
+      bank: "",
+      recipient: "",
+      note: "",
+      paypal: "",
+      revolut: "",
+      other: "",
+      donatePageUrl: "https://opbk.varna.bg/%d0%b4%d0%b0%d1%80%d0%b8%d1%82%d0%b5%d0%bb%d0%b8/"
+    }
+  },
+  {
+    name: "Общински приют Пловдив",
+    city: "Пловдив",
+    address: "гр. Пловдив",
+    lat: 42.1354, lng: 24.7453,
+    walkDays: ["Събота"],
+    walkTime: "15 минути на куче (фиксирано)",
+    walkInfo: "Всяка събота задължително има разходки — всеки може да се включи. Кучетата излизат в две заграждения. Приютът съществува от 2009 г. и стопанисва около 60 кучета.",
+    needs: [
+      "Нови по-големи клетки за кучета",
+      "Купи за пиене и храна (настоящите са ръждясали)",
+      "Нови скари"
+    ],
+    gallery: [],
+    phone: "0894452419", facebook: "", website: "",
+    donate: {
+      iban: "",
+      bic: "",
+      bank: "",
+      recipient: "",
+      note: "",
+      paypal: "",
+      revolut: "",
+      other: ""
+    }
+  },
+  {
+    name: "PAW – Pazardjik Animal Welfare",
+    city: "Пазарджик",
+    address: "с. Мало Конаре, обл. Пазарджик",
+    lat: 42.1766, lng: 24.4674,
+    walkDays: ["Събота","Неделя"],
+    walkTime: "Уикенд — почти целия ден",
+    walkInfo: "С удоволствие приемаме доброволци! Кучетата тичат свободно в дворовете и по полето. Фармата съществува от 2017 г. и се грижи за около 60 кучета.",
+    needs: [
+      "Доброволци — само двама човека се грижат за всичко",
+      "Ремонт на покрива (изгнил и се рони)",
+      "Нова електрическа инсталация"
+    ],
+    gallery: ["images/pawpazardjik-1.jpg","images/pawpazardjik-2.jpg","images/pawpazardjik-3.jpg"],
+    phone: "", facebook: "https://www.facebook.com/people/PAW-Pazardjik-Animal-Welfare/100064815574079/", website: "",
+    donate: {
+      iban: "BG48UBBS88881000988899",
+      bic: "UBBSBGSF",
+      bank: "Обединена Българска Банка (ОББ)",
+      recipient: "Сдружение ПАУ Пазарджик",
+      note: "Дарение",
+      paypal: "",
+      revolut: "",
+      other: ""
+    }
+  },
+  {
+    name: "Общински приют за безстопанствени кучета — Перник",
+    city: "Перник",
+    address: "Общински Кастрационен Център, гр. Перник",
+    lat: 42.6055, lng: 23.0370,
+    walkDays: ["Събота","Неделя"],
+    walkTime: "10:00 – 15:00 (събота и неделя)",
+    walkInfo: "Всяка събота и неделя между 10 и 15 часа сте добре дошли да разходите кучетата ни на повод. Много е възможно така да намерите и своя нов домашен любимец! Към приюта има спонтанно организирана група от доброволци, която активно помага на екипа.",
+    needs: [
+      "Специализирана ветеринарна храна за болни кучета",
+      "Суха, консервирана или друга храна за кучета",
+      "Сено за постилане на клетките",
+      "Завивки, одеяла и текстилни постелки",
+      "Дезинфектанти (Доместос, белина)",
+      "Финансови средства за лечение"
+    ],
+    gallery: ["images/pernik-1.jpg"],
+    phone: "0884458769", facebook: "", website: "https://dogs.pernik.is-bg.com/",
+    donate: {
+      iban: "BG65CECB97903194914300",
+      bic: "CECBBGSF",
+      bank: "Централна Кооперативна Банка (ЦКБ)",
+      recipient: "Община Перник",
+      note: "За общински приют за безстопанствени кучета",
+      paypal: "",
+      revolut: "",
+      other: ""
+    }
+  },
+  {
+    name: "Улични Сърца БГ / Street Hearts BG",
+    city: "Дряново",
+    address: "с. Глушка, общ. Дряново, обл. Габрово",
+    lat: 42.9650, lng: 25.4400,
+    walkDays: ["Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота","Неделя"],
+    walkTime: "С предварителна уговорка — 7 дни в седмицата",
+    walkInfo: "Вратите ни са винаги отворени за доброволци с предварителна уговорка. Има опция за настаняване при по-дълъг престой — осигуряваме спане и храна. Търсим доброволци за разходки, социализация, поддръжка, ремонтни дейности, социални медии и груминг. В приюта има 50 кучета, котки, коне, прасета и кокошки — всички спасени.",
+    needs: [
+      "Средства за по-висококачествена храна",
+      "Помощ за строеж на допълнителни затворени помещения за зимата",
+      "Доброволци (местни и от чужбина) — минимален престой 2 седмици"
+    ],
+    gallery: ["images/streethearts-1.png","images/streethearts-2.jpg","images/streethearts-3.jpg"],
+    phone: "0877260760", facebook: "", website: "https://www.streetheartsbg.com",
+    donate: {
+      iban: "BG40STSA93000027043746",
+      bic: "",
+      bank: "",
+      recipient: "Фондация Улични Сърца БГ",
+      note: "Дарение",
+      paypal: "https://www.paypal.me/streetheartsbg",
+      revolut: "",
+      other: "https://www.patreon.com/cw/streetheartsbg",
+      otherLabel: "Patreon",
+      donatePageUrl: "https://streetheartsbg.com/how-you-can-help-dogs-in-bulgaria/donations-to-help-street-dogs-in-bulgaria.html",
+      shop: "https://streetheartsbg.com/buy-the-official-street-hearts-book.html"
+    }
+  },
+  {
+    name: "Общински приют Омуртаг",
+    city: "Омуртаг",
+    address: "гр. Омуртаг 7900",
+    lat: 43.1039, lng: 26.4185,
+    walkDays: ["Събота","Неделя"],
+    walkTime: "С уговорка",
+    walkInfo: "За записване и повече информация се свържете директно с приюта.",
+    needs: [
+      "Одеяла и зимни консумативи за кучетата"
+    ],
+    gallery: ["images/omurtag-1.jpg"],
+    phone: "0877120341", facebook: "https://www.facebook.com/profile.php?id=61580116203593", website: "",
+    donate: {
+      iban: "",
+      bic: "",
+      bank: "",
+      recipient: "",
+      note: "",
+      paypal: "",
+      revolut: "",
+      other: ""
+    }
+  }
+];
+// ============================================================
+
+// ── Map setup ──
+const bulgariaBounds = L.latLngBounds(
+  L.latLng(41.23, 22.35), L.latLng(44.22, 28.68)
+);
+const map = L.map('map', {
+  center: [42.7339, 25.4858], zoom: 7, minZoom: 7, maxZoom: 15,
+  maxBounds: bulgariaBounds, maxBoundsViscosity: 1.0
+});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  maxZoom: 19
+}).addTo(map);
+
+
+function makeIcon() {
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:22px;height:22px;background:#cd6a18;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,0.28);"></div>`,
+    iconSize: [22, 22], iconAnchor: [11, 22], popupAnchor: [0, -24]
+  });
+}
+
+function buildPopup(s) {
+  const idx = shelters.indexOf(s);
+  const days = s.walkDays.map(d => `<span class="popup-tag">${d}</span>`).join('');
+  return `
+    <div class="popup-inner">
+      <div class="popup-name">${s.name}</div>
+      <div class="popup-city">📍 ${s.city}</div>
+      <div class="popup-days">${days}</div>
+      <div style="font-size:0.78rem;color:#666;">🕙 ${s.walkTime}</div>
+      <button class="popup-more-btn" onclick="openPanel(${idx})">Виж повече →</button>
+    </div>`;
+}
+
+// ── Card image navigation ──
+window._cardCur = {};
+function cardImgGo(shelterIdx, imgIdx) {
+  const s = shelters[shelterIdx];
+  if (!s.gallery || s.gallery.length < 2) return;
+  window._cardCur[shelterIdx] = imgIdx;
+  const imgEl = document.getElementById('card-img-' + shelterIdx);
+  if (imgEl) imgEl.src = s.gallery[imgIdx];
+  const wrap = imgEl && imgEl.closest('.card-image-wrap');
+  if (wrap) {
+    wrap.setAttribute('data-cur', imgIdx);
+    wrap.querySelectorAll('.card-img-dot').forEach((d, i) => d.classList.toggle('active', i === imgIdx));
+  }
+}
+function cardImgNav(shelterIdx, dir) {
+  const s = shelters[shelterIdx];
+  if (!s.gallery || s.gallery.length < 2) return;
+  const cur = window._cardCur[shelterIdx] || 0;
+  const next = (cur + dir + s.gallery.length) % s.gallery.length;
+  cardImgGo(shelterIdx, next);
+}
+
+// ── Donate helpers ──
+function buildDonatePanel(d) {
+  if (!d) return '';
+  const hasBank = d.iban || d.recipient || d.bank;
+  const hasLinks = d.paypal || d.revolut || d.other || d.donatePageUrl;
+  if (!hasBank && !hasLinks) return '';
+  let html = `<div class="donate-section"><div class="donate-section-title">Дарение</div>`;
+  if (d.recipient) html += `<div class="donate-row"><span class="donate-label">Получател</span><span class="donate-value">${d.recipient}</span></div>`;
+  if (d.iban)      html += `<div class="donate-row"><span class="donate-label">IBAN</span><span class="donate-value">${d.iban}</span></div>`;
+  if (d.bic)       html += `<div class="donate-row"><span class="donate-label">BIC</span><span class="donate-value">${d.bic}</span></div>`;
+  if (d.bank)      html += `<div class="donate-row"><span class="donate-label">Банка</span><span class="donate-value">${d.bank}</span></div>`;
+  if (d.note)      html += `<div class="donate-row"><span class="donate-label">Основание</span><span class="donate-value">${d.note}</span></div>`;
+  if (d.donatePageUrl) html += `<a class="donate-link" href="${d.donatePageUrl}" target="_blank">Страница за дарения</a>`;
+  if (d.paypal)    html += `<a class="donate-link${d.donatePageUrl ? ' alt' : ''}" href="${d.paypal}" target="_blank">PayPal</a>`;
+  if (d.revolut)   html += `<a class="donate-link alt" href="${d.revolut}" target="_blank">Revolut</a>`;
+  if (d.other)     html += `<a class="donate-link alt" href="${d.other}" target="_blank">${d.otherLabel || 'Дари онлайн'}</a>`;
+  if (d.shop)      html += `<a class="donate-link alt" href="${d.shop}" target="_blank">📖 Купи книгата</a>`;
+  html += `</div>`;
+  return html;
+}
+function buildDonateCard(d) {
+  if (!d) return '';
+  const hasBank = d.iban || d.recipient || d.bank;
+  const hasLinks = d.paypal || d.revolut || d.other || d.donatePageUrl;
+  if (!hasBank && !hasLinks) return '';
+  const s = 'font-size:0.72rem;padding:5px 11px;margin-top:4px;';
+  let html = `<div class="card-donate"><div class="card-donate-title">Дарение</div>`;
+  if (d.recipient) html += `<div class="card-donate-row"><span class="card-donate-label">Получател</span><span class="card-donate-value">${d.recipient}</span></div>`;
+  if (d.iban)      html += `<div class="card-donate-row"><span class="card-donate-label">IBAN</span><span class="card-donate-value">${d.iban}</span></div>`;
+  if (d.bic)       html += `<div class="card-donate-row"><span class="card-donate-label">BIC</span><span class="card-donate-value">${d.bic}</span></div>`;
+  if (d.bank)      html += `<div class="card-donate-row"><span class="card-donate-label">Банка</span><span class="card-donate-value">${d.bank}</span></div>`;
+  if (d.note)      html += `<div class="card-donate-row"><span class="card-donate-label">Основание</span><span class="card-donate-value">${d.note}</span></div>`;
+  if (d.donatePageUrl) html += `<a class="donate-link" style="${s}" href="${d.donatePageUrl}" target="_blank" onclick="event.stopPropagation()">Страница за дарения</a>`;
+  if (d.paypal)    html += `<a class="donate-link${d.donatePageUrl ? ' alt' : ''}" style="${s}" href="${d.paypal}" target="_blank" onclick="event.stopPropagation()">PayPal</a>`;
+  if (d.revolut)   html += `<a class="donate-link alt" style="${s}" href="${d.revolut}" target="_blank" onclick="event.stopPropagation()">Revolut</a>`;
+  if (d.other)     html += `<a class="donate-link alt" style="${s}" href="${d.other}" target="_blank" onclick="event.stopPropagation()">${d.otherLabel || 'Дари онлайн'}</a>`;
+  if (d.shop)      html += `<a class="donate-link alt" style="${s}" href="${d.shop}" target="_blank" onclick="event.stopPropagation()">📖 Купи книгата</a>`;
+  html += `</div>`;
+  return html;
+}
+
+// ── Flip Card ──
+function flipCard(card) {
+  card.classList.toggle('flipped');
+}
+
+// ── Side Panel ──
+function openPanel(idx) {
+  const s = shelters[idx];
+  const panelImg = document.getElementById('panel-top-img');
+  if (s.gallery && s.gallery.length > 0) {
+    const total = s.gallery.length;
+    const thumbsHtml = s.gallery.map((src, i) =>
+      `<img src="${src}" class="${i===0?'active':''}" onclick="panelSetImg(${i})" alt="">`
+    ).join('');
+    panelImg.innerHTML = `
+      <div class="panel-gallery">
+        <div class="panel-gallery-main">
+          <img id="panel-main-img" src="${s.gallery[0]}" alt="${s.name}" onclick="openLightbox(window._panelGallery, window._panelCurrent)">
+          <button class="expand-btn" onclick="openLightbox(window._panelGallery, window._panelCurrent)">⛶</button>
+          ${total > 1 ? `
+            <button class="panel-gallery-arrow prev" onclick="panelPrev()">&#8249;</button>
+            <button class="panel-gallery-arrow next" onclick="panelNext()">&#8250;</button>
+            <div class="panel-gallery-counter" id="panel-gallery-counter">1 / ${total}</div>
+          ` : ''}
+        </div>
+        ${total > 1 ? `<div class="panel-gallery-thumbs" id="panel-thumbs">${thumbsHtml}</div>` : ''}
+      </div>`;
+
+    window._panelGallery = s.gallery;
+    window._panelCurrent = 0;
+    window.panelSetImg = function(i) {
+      window._panelCurrent = i;
+      document.getElementById('panel-main-img').src = window._panelGallery[i];
+      document.getElementById('panel-gallery-counter').textContent = `${i+1} / ${window._panelGallery.length}`;
+      document.querySelectorAll('#panel-thumbs img').forEach((t,ti) => t.classList.toggle('active', ti===i));
+    };
+    window.panelNext = function() { panelSetImg((window._panelCurrent+1) % window._panelGallery.length); };
+    window.panelPrev = function() { panelSetImg((window._panelCurrent - 1 + window._panelGallery.length) % window._panelGallery.length); };
+  } else {
+    panelImg.innerHTML = `<div class="panel-img-placeholder">🐾</div>`;
+  }
+
+  document.getElementById('panel-name').textContent = s.name;
+  document.getElementById('panel-city').textContent = '📍 ' + s.city + (s.address ? ' — ' + s.address : '');
+
+  let html = '';
+  const days = s.walkDays.map(d => `<span class="panel-tag">${d}</span>`).join('');
+  html += `<div class="panel-section">
+    <div class="panel-section-title">Дни за разходки</div>
+    <div>${days}</div>
+    <div style="margin-top:8px;font-size:0.85rem;color:#444;">🕙 ${s.walkTime}</div>
+  </div>`;
+  html += `<div class="panel-section">
+    <div class="panel-section-title">Как да се запишеш</div>
+    <div class="panel-section-body">${s.walkInfo}</div>
+  </div>`;
+  if (s.needs && s.needs.length > 0) {
+    html += `<div class="panel-section">
+      <div class="panel-section-title">С какво можеш да помогнеш</div>
+      ${s.needs.map(n => `<div class="panel-need">${n}</div>`).join('')}
+    </div>`;
+  }
+  const donateHtml = buildDonatePanel(s.donate);
+  if (donateHtml) html += `<div class="panel-section">${donateHtml}</div>`;
+
+  let links = '';
+  if (s.phone)    links += `<a class="secondary" href="tel:${s.phone}">📞 ${s.phone}</a>`;
+  if (s.facebook) links += `<a class="primary" href="${s.facebook}" target="_blank">Facebook</a>`;
+  if (s.website)  links += `<a class="primary" href="${s.website}" target="_blank">Уебсайт</a>`;
+  if (links) html += `<div class="panel-section"><div class="panel-section-title">Контакти</div><div class="panel-links">${links}</div></div>`;
+
+  document.getElementById('panel-body').innerHTML = html;
+  document.getElementById('shelter-panel').classList.add('open');
+  document.getElementById('panel-overlay').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('shelter-panel').classList.remove('open');
+  document.getElementById('panel-overlay').classList.remove('open');
+}
+
+// ── Map fullscreen ──
+let mapIsFullscreen = false;
+function toggleMapFullscreen() {
+  const mapEl = document.getElementById('map');
+  const btn = document.getElementById('map-fullscreen-btn');
+  mapIsFullscreen = !mapIsFullscreen;
+  mapEl.classList.toggle('map-fullscreen', mapIsFullscreen);
+  btn.textContent = mapIsFullscreen ? '✕' : '⛶';
+  btn.title = mapIsFullscreen ? 'Затвори' : 'Цял екран';
+  setTimeout(() => map.invalidateSize(), 60);
+}
+// Also close fullscreen on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && mapIsFullscreen) toggleMapFullscreen();
+});
+document.getElementById('panel-overlay').addEventListener('click', closePanel);
+
+// ── Markers ──
+let markers = [];
+shelters.forEach(s => {
+  const marker = L.marker([s.lat, s.lng], { icon: makeIcon() })
+    .bindPopup(buildPopup(s), { maxWidth: 280 });
+  marker._shelterData = s;
+  marker.addTo(map);
+  markers.push(marker);
+});
+
+// ── Catalogue ──
+function buildCatalogue(list) {
+  const grid = document.getElementById('catalogue');
+  if (list.length === 0) {
+    grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:#aaa;font-size:0.95rem;">Няма намерени приюти.</div>`;
+    return;
+  }
+  grid.innerHTML = `<div class="catalogue-grid">${list.map((s) => {
+    const idx = shelters.indexOf(s);
+    const days = s.walkDays.map(d => `<span class="card-tag">${d}</span>`).join('');
+
+    const hasImgs = s.gallery && s.gallery.length > 0;
+    const galleryJson = JSON.stringify(s.gallery || []);
+    const dots = hasImgs && s.gallery.length > 1
+      ? `<div class="card-img-dots">${s.gallery.map((_,i) => `<div class="card-img-dot${i===0?' active':''}" onclick="event.stopPropagation();cardImgGo(${idx},${i})"></div>`).join('')}</div>`
+      : '';
+    const arrows = hasImgs && s.gallery.length > 1
+      ? `<button class="card-img-arrow prev" onclick="event.stopPropagation();cardImgNav(${idx},-1)">&#8249;</button>
+         <button class="card-img-arrow next" onclick="event.stopPropagation();cardImgNav(${idx},1)">&#8250;</button>`
+      : '';
+    const cardImgHtml = hasImgs
+      ? `<div class="card-image-wrap" data-idx="${idx}" data-cur="0">
+           <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name}" onclick="event.stopPropagation();openLightbox(${galleryJson}, window._cardCur&&window._cardCur[${idx}]||0)">
+           ${arrows}${dots}
+         </div>`
+      : `<div class="card-image-placeholder">🐾</div>`;
+
+    const needsHtml = s.needs && s.needs.length > 0 ? `
+      <div class="card-needs-back">
+        <div class="card-back-section-title">Нуждае се от</div>
+        ${s.needs.map(n => `<div class="card-need-item">${n}</div>`).join('')}
+      </div>` : '';
+
+    const donateCardHtml = buildDonateCard(s.donate);
+
+    let links = '';
+    if (s.phone)    links += `<a class="card-link secondary" href="tel:${s.phone}" onclick="event.stopPropagation()">📞 ${s.phone}</a>`;
+    if (s.facebook) links += `<a class="card-link primary" href="${s.facebook}" target="_blank" onclick="event.stopPropagation()">Facebook</a>`;
+    if (s.website)  links += `<a class="card-link primary" href="${s.website}" target="_blank" onclick="event.stopPropagation()">Уебсайт</a>`;
+    const linksHtml = links ? `<div class="card-back-links">${links}</div>` : '';
+
+    return `
+      <div class="shelter-card" data-idx="${idx}">
+        <div class="card-inner">
+
+          <div class="card-front" onclick="flipCard(this.closest('.shelter-card'))">
+            ${cardImgHtml}
+            <div class="card-body">
+              <div class="card-name">${s.name}</div>
+              <div class="card-city">📍 ${s.city} — ${s.address}</div>
+              <div class="card-tags">${days}</div>
+              <div class="card-row"><span class="card-row-icon">🕙</span>${s.walkTime}</div>
+              <div class="card-spacer"></div>
+              <div class="card-flip-hint">Натисни за детайли →</div>
+            </div>
+          </div>
+
+          <div class="card-back">
+            <div class="card-back-header">
+              <div class="card-back-name">${s.name}</div>
+              <button class="card-flip-back-btn" onclick="flipCard(this.closest('.shelter-card'))">←</button>
+            </div>
+            <div class="card-back-body">
+              <div>
+                <div class="card-back-section-title">Как да се запишеш</div>
+                <div style="font-size:0.82rem;color:#444;line-height:1.5;">${s.walkInfo}</div>
+              </div>
+              ${needsHtml}
+              ${donateCardHtml}
+              ${linksHtml}
+              <button class="card-open-panel-btn" onclick="event.stopPropagation();openPanel(${idx})">Виж пълен профил →</button>
+            </div>
+          </div>
+
+        </div>
+      </div>`;
+  }).join('')}</div>`;
+}
+
+// ── View toggle ──
+let currentView = 'map';
+function setView(view) {
+  currentView = view;
+  document.getElementById('map').style.display = view === 'map' ? 'block' : 'none';
+  const cat = document.getElementById('catalogue');
+  if (view === 'catalogue') { cat.classList.add('visible'); }
+  else { cat.classList.remove('visible'); }
+  document.getElementById('btn-map').classList.toggle('active', view === 'map');
+  document.getElementById('btn-cat').classList.toggle('active', view === 'catalogue');
+  if (view === 'map') map.invalidateSize();
+  if (view === 'catalogue') equalizeCards();
+}
+
+// ── City filter ──
+const cities = [...new Set(shelters.map(s => s.city))].sort();
+const citySelect = document.getElementById('cityFilter');
+cities.forEach(c => {
+  const opt = document.createElement('option');
+  opt.value = c; opt.textContent = c;
+  citySelect.appendChild(opt);
+});
+
+// ── Filters ──
+function applyFilters() {
+  const city = document.getElementById('cityFilter').value;
+  const day  = document.getElementById('dayFilter').value;
+  const q    = document.getElementById('searchInput').value.toLowerCase().trim();
+  let visible = 0;
+  const filteredShelters = [];
+
+  markers.forEach(m => {
+    const s = m._shelterData;
+    const matchCity = city === 'all' || s.city === city;
+    const matchDay  = day  === 'all' || s.walkDays.includes(day);
+    const matchQ    = !q   || s.name.toLowerCase().includes(q) || s.city.toLowerCase().includes(q);
+    if (matchCity && matchDay && matchQ) {
+      m.addTo(map); visible++;
+      filteredShelters.push(s);
+    } else {
+      map.removeLayer(m);
+    }
+  });
+
+  document.getElementById('shelterCount').textContent = `${visible} от ${shelters.length} приюта`;
+  buildCatalogue(filteredShelters);
+  if (currentView === 'catalogue') equalizeCards();
+}
+
+// ── Equal-height flip cards ──
+function equalizeCards() {
+  setTimeout(() => {
+    const cards  = document.querySelectorAll('.shelter-card');
+    const inners = document.querySelectorAll('.card-inner');
+    const fronts = document.querySelectorAll('.card-front');
+
+    cards.forEach(c  => c.style.height  = '');
+    inners.forEach(i => i.style.height  = '');
+
+    fronts.forEach(f => { f.style.position = 'relative'; f.style.height = 'auto'; });
+    let maxH = 0;
+    fronts.forEach(f => { if (f.offsetHeight > maxH) maxH = f.offsetHeight; });
+    fronts.forEach(f => { f.style.position = ''; f.style.height = ''; });
+
+    if (maxH > 0) {
+      const h = maxH + 'px';
+      cards.forEach(c  => c.style.height = h);
+      inners.forEach(i => i.style.height = h);
+    }
+  }, 80);
+}
+
+document.getElementById('cityFilter').addEventListener('change', applyFilters);
+document.getElementById('dayFilter').addEventListener('change', applyFilters);
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+applyFilters();
+
+// ── Location-aware shelter suggestion ──
+const BG_DAYS = ['Неделя','Понеделник','Вторник','Сряда','Четвъртък','Петък','Събота'];
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371, toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+function showSuggestion(s, idx, distKm, today, hasWalksToday) {
+  const old = document.getElementById('suggestion-banner');
+  if (old) old.remove();
+
+  const dist = distKm < 1 ? 'под 1 км' : `${Math.round(distKm)} км`;
+  const walksNote = hasWalksToday
+    ? `Днес (${today}) имат разходки!`
+    : `Разходки: ${s.walkDays.join(', ')}`;
+
+  const banner = document.createElement('div');
+  banner.id = 'suggestion-banner';
+  banner.innerHTML = `
+    <div class="suggestion-inner">
+      <div class="suggestion-icon">📍</div>
+      <div class="suggestion-text">
+        <div class="suggestion-title">Най-близкият приют до теб е <strong>${s.name}</strong></div>
+        <div class="suggestion-sub">${s.city} · ${dist} от теб · ${walksNote}</div>
+      </div>
+      <button class="suggestion-btn" onclick="openPanel(${idx})">Виж →</button>
+      <button class="suggestion-close" onclick="document.getElementById('suggestion-banner').remove()">✕</button>
+    </div>`;
+
+  document.querySelector('.controls').after(banner);
+  if (currentView === 'map') map.setView([s.lat, s.lng], 11);
+}
+
+function handleLocation(lat, lng) {
+  const today = BG_DAYS[new Date().getDay()];
+
+  const ranked = shelters
+    .map(s => ({ s, dist: haversineKm(lat, lng, s.lat, s.lng) }))
+    .sort((a, b) => a.dist - b.dist);
+
+  // Prefer nearest shelter with walks today, otherwise nearest overall
+  const best = ranked.find(r => r.s.walkDays.includes(today)) || ranked[0];
+  const idx  = shelters.indexOf(best.s);
+
+  // Instantly update all three filters
+  document.getElementById('dayFilter').value  = today;
+  document.getElementById('cityFilter').value = best.s.city;
+  document.getElementById('searchInput').value = '';
+  applyFilters();
+
+  // Briefly flash the shelter count so the user notices it updated
+  const countEl = document.getElementById('shelterCount');
+  countEl.style.transition = 'none';
+  countEl.style.color = '#cd6a18';
+  countEl.style.fontWeight = '700';
+  setTimeout(() => {
+    countEl.style.transition = 'color 0.8s, font-weight 0.8s';
+    countEl.style.color = '';
+    countEl.style.fontWeight = '';
+  }, 900);
+
+  showSuggestion(best.s, idx, best.dist, today, best.s.walkDays.includes(today));
+}
+
+async function detectLocation() {
+  if (!navigator.geolocation) return;
+
+  // If permission was already granted before, skip the prompt and go straight in
+  try {
+    const perm = await navigator.permissions.query({ name: 'geolocation' });
+    if (perm.state === 'denied') return;
+
+    // Use localStorage cache (valid for 1 hour) so we don't re-prompt on every visit
+    const saved = JSON.parse(localStorage.getItem('shelter_loc') || 'null');
+    if (saved && Date.now() - saved.t < 3_600_000) {
+      handleLocation(saved.lat, saved.lng);
+      return;
+    }
+  } catch (_) { /* permissions API not supported, continue */ }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      // Save so next visit is instant — no prompt needed
+      localStorage.setItem('shelter_loc', JSON.stringify({ lat, lng, t: Date.now() }));
+      handleLocation(lat, lng);
+    },
+    () => { /* user denied — silently ignore */ },
+    { maximumAge: 3_600_000, timeout: 10_000 }
+  );
+}
+
+// Run on load — if already allowed it fires instantly, otherwise shows the browser prompt
+detectLocation();
+
+// Re-equalize on resize / orientation change
+let _resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    if (currentView === 'catalogue') equalizeCards();
+    map.invalidateSize();
+  }, 250);
+});
+
+// ── Lightbox ──
+let _lbImages = [], _lbIndex = 0, _lbTouchX = 0;
+
+function openLightbox(images, startIndex) {
+  _lbImages = typeof images === 'string' ? JSON.parse(images) : images;
+  _lbIndex = startIndex;
+  updateLightbox();
+  document.getElementById('lightbox').classList.add('open');
+  document.getElementById('lightbox-prev').style.display = _lbImages.length > 1 ? 'flex' : 'none';
+  document.getElementById('lightbox-next').style.display = _lbImages.length > 1 ? 'flex' : 'none';
+}
+function updateLightbox() {
+  document.getElementById('lightbox-img').src = _lbImages[_lbIndex];
+  document.getElementById('lightbox-counter').textContent =
+    _lbImages.length > 1 ? `${_lbIndex + 1} / ${_lbImages.length}` : '';
+}
+function lightboxNav(dir) {
+  _lbIndex = (_lbIndex + dir + _lbImages.length) % _lbImages.length;
+  updateLightbox();
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape')     closeLightbox();
+  if (e.key === 'ArrowRight') lightboxNav(1);
+  if (e.key === 'ArrowLeft')  lightboxNav(-1);
+});
+
+// Touch swipe on lightbox
+document.getElementById('lightbox').addEventListener('touchstart', e => {
+  _lbTouchX = e.touches[0].clientX;
+}, { passive: true });
+document.getElementById('lightbox').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - _lbTouchX;
+  if (Math.abs(dx) > 50) lightboxNav(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+</script>
+</body>
+</html>
