@@ -1090,7 +1090,8 @@ const shelters = [
       "Система за мъгла"
     ],
     gallery: ["images/svishtov1.webp","images/svishtov2.webp","images/svishtov3.webp","images/svishtov4.webp","images/svishtov5.webp"],
-    phone: "", facebook: "", website: "",
+    phone: "0888059026", facebook: "https://www.facebook.com/people/%D0%97%D0%B0%D0%B5%D0%B4%D0%BD%D0%BE-%D0%B7%D0%B0-%D0%B1%D0%B5%D0%B7%D0%B4%D0%BE%D0%BC%D0%BD%D0%B8%D1%82%D0%B5-%D0%B6%D0%B8%D0%B2%D0%BE%D1%82%D0%BD%D0%B8-%D0%91%D0%B5%D0%BB%D0%BB%D0%B0-%D0%B8-%D0%96%D0%B8%D0%B2%D0%BE%D1%82-%D0%B1%D0%B5%D0%B7-%D0%A0%D0%B8%D1%81%D0%BA/61558736531565/", website: "",
+    instagram: "https://www.instagram.com/zaednozabezdomnite",
     donate: {
       iban: "",
       bic: "",
@@ -1269,9 +1270,10 @@ function openPanel(idx) {
   if (donateHtml) html += `<div class="panel-section">${donateHtml}</div>`;
 
   let links = '';
-  if (s.phone)    links += `<a class="secondary" href="tel:${s.phone}">📞 ${s.phone}</a>`;
-  if (s.facebook) links += `<a class="primary" href="${s.facebook}" target="_blank">Facebook</a>`;
-  if (s.website)  links += `<a class="primary" href="${s.website}" target="_blank">Уебсайт</a>`;
+  if (s.phone)     links += `<a class="secondary" href="tel:${s.phone}">📞 ${s.phone}</a>`;
+  if (s.facebook)  links += `<a class="primary" href="${s.facebook}" target="_blank">Facebook</a>`;
+  if (s.instagram) links += `<a class="primary" href="${s.instagram}" target="_blank">Instagram</a>`;
+  if (s.website)   links += `<a class="primary" href="${s.website}" target="_blank">Уебсайт</a>`;
   if (links) html += `<div class="panel-section"><div class="panel-section-title">Контакти</div><div class="panel-links">${links}</div></div>`;
 
   document.getElementById('panel-body').innerHTML = html;
@@ -1347,9 +1349,10 @@ function buildCatalogue(list) {
     const donateCardHtml = buildDonateCard(s.donate);
 
     let links = '';
-    if (s.phone)    links += `<a class="card-link secondary" href="tel:${s.phone}" onclick="event.stopPropagation()">📞 ${s.phone}</a>`;
-    if (s.facebook) links += `<a class="card-link primary" href="${s.facebook}" target="_blank" onclick="event.stopPropagation()">Facebook</a>`;
-    if (s.website)  links += `<a class="card-link primary" href="${s.website}" target="_blank" onclick="event.stopPropagation()">Уебсайт</a>`;
+    if (s.phone)     links += `<a class="card-link secondary" href="tel:${s.phone}" onclick="event.stopPropagation()">📞 ${s.phone}</a>`;
+    if (s.facebook)  links += `<a class="card-link primary" href="${s.facebook}" target="_blank" onclick="event.stopPropagation()">Facebook</a>`;
+    if (s.instagram) links += `<a class="card-link primary" href="${s.instagram}" target="_blank" onclick="event.stopPropagation()">Instagram</a>`;
+    if (s.website)   links += `<a class="card-link primary" href="${s.website}" target="_blank" onclick="event.stopPropagation()">Уебсайт</a>`;
     const linksHtml = links ? `<div class="card-back-links">${links}</div>` : '';
 
     return `
