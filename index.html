@@ -1143,6 +1143,7 @@ const shelters = [
     ],
     gallery: [],
     phone: "0878184400", facebook: "https://www.facebook.com/profile.php?id=61554875907161", website: "https://priyut.blagoevgrad.bg/",
+    adoptUrl: "https://priyut.blagoevgrad.bg/osinovi/osinovi-zhivotno",
     donate: null
   }
 ];
@@ -1316,6 +1317,7 @@ function openPanel(idx) {
   if (s.facebook)  links += `<a class="primary" href="${s.facebook}" target="_blank">Facebook</a>`;
   if (s.instagram) links += `<a class="primary" href="${s.instagram}" target="_blank">Instagram</a>`;
   if (s.website)   links += `<a class="primary" href="${s.website}" target="_blank">Уебсайт</a>`;
+  if (s.adoptUrl)  links += `<a class="primary" style="background:#e07b1a;" href="${s.adoptUrl}" target="_blank">🐾 Осинови</a>`;
   if (links) html += `<div class="panel-section"><div class="panel-section-title">Контакти</div><div class="panel-links">${links}</div></div>`;
 
   document.getElementById('panel-body').innerHTML = html;
@@ -1401,6 +1403,7 @@ function buildCatalogue(list) {
     if (s.facebook)  links += `<a class="card-link primary" href="${s.facebook}" target="_blank" onclick="event.stopPropagation()">Facebook</a>`;
     if (s.instagram) links += `<a class="card-link primary" href="${s.instagram}" target="_blank" onclick="event.stopPropagation()">Instagram</a>`;
     if (s.website)   links += `<a class="card-link primary" href="${s.website}" target="_blank" onclick="event.stopPropagation()">Уебсайт</a>`;
+    if (s.adoptUrl)  links += `<a class="card-link primary" style="background:#e07b1a;" href="${s.adoptUrl}" target="_blank" onclick="event.stopPropagation()">🐾 Осинови</a>`;
     const linksHtml = links ? `<div class="card-back-links">${links}</div>` : '';
 
     return `
