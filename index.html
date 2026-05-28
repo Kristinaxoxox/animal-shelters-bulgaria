@@ -28,8 +28,15 @@
       gap: 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       overflow: visible;
-      position: relative;
+      position: sticky;
+      top: 0;
       z-index: 1000;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    header.header-hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
     }
     header img.logo {
       height: 110px; width: auto; display: block;
@@ -73,8 +80,10 @@
       background: #fdf5ec;
       border-bottom: 1px solid #f5d4ae;
       align-items: center;
-      position: relative;
+      position: sticky;
+      top: 0;
       z-index: 999;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 
     /* Each label+input pair */
@@ -1202,7 +1211,7 @@ const shelters = [
     needs: [
       "Осиновители — бебета и млади кучета чакат своя дом"
     ],
-    gallery: [],
+    gallery: ["images/seslavtsi-ecoravnovesie.jpg"],
     phone: "0293141464", facebook: "https://www.facebook.com/ecoravnovesie/", website: "https://ecoravnovesie.sofia.bg/",
     adoptUrl: "https://ecoravnovesie.sofia.bg/shelter/priyut-seslavtsi",
     walkUrl: "https://ecoravnovesie.sofia.bg/walk",
@@ -1219,7 +1228,7 @@ const shelters = [
     needs: [
       "Осиновители — млади и малки кучета чакат своя дом"
     ],
-    gallery: [],
+    gallery: ["images/slatina-ecoravnovesie.jpg"],
     phone: "0293141464", facebook: "https://www.facebook.com/ecoravnovesie/", website: "https://ecoravnovesie.sofia.bg/",
     adoptUrl: "https://ecoravnovesie.sofia.bg/shelter/priyut-slatina",
     walkUrl: "https://ecoravnovesie.sofia.bg/walk",
@@ -1432,6 +1441,22 @@ function scrollToMap() {
   setView('map');
   document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
 }
+
+// ── Hide header on scroll down, show on scroll up ──
+(function() {
+  let lastY = 0;
+  const THRESHOLD = 60; // px scrolled down before hiding
+  window.addEventListener('scroll', function() {
+    const y = window.scrollY;
+    const header = document.querySelector('header');
+    if (y > lastY && y > THRESHOLD) {
+      header.classList.add('header-hidden');
+    } else {
+      header.classList.remove('header-hidden');
+    }
+    lastY = y;
+  }, { passive: true });
+})();
 
 // ── Map fullscreen ──
 let mapIsFullscreen = false;
