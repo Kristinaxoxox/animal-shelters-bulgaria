@@ -19,6 +19,12 @@
     /* ══════════════════════════════════
        HEADER
     ══════════════════════════════════ */
+    #top-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+    }
+
     header {
       background: #cd6a18;
       color: white;
@@ -26,10 +32,15 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      overflow: visible;
-      position: relative;
-      z-index: 1000;
+      overflow: hidden;
+      max-height: 200px;
+      transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.25s ease;
+    }
+    header.header-hidden {
+      max-height: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      opacity: 0;
     }
     header img.logo {
       height: 110px; width: auto; display: block;
@@ -73,9 +84,6 @@
       background: #fdf5ec;
       border-bottom: 1px solid #f5d4ae;
       align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 999;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
 
@@ -142,7 +150,7 @@
     ══════════════════════════════════ */
     html { height: 100%; }
     body { height: 100%; overflow-y: auto; }
-    #map { height: calc(100svh - 115px); width: 100%; position: relative; }
+    #map { height: calc(100svh - var(--topbar-h, 115px)); width: 100%; position: relative; }
 
     /* Fullscreen map */
     #map.map-fullscreen {
@@ -834,6 +842,7 @@
 </head>
 <body>
 
+<div id="top-bar">
 <header>
   <img src="logo_clean.png" alt="Меко и Приятелски" class="logo"
        onclick="setView('map')" title="Обратно към картата"/>
@@ -877,6 +886,8 @@
     </div>
   </div>
 </div>
+</div><!-- /#top-bar -->
+<div id="top-bar-spacer"></div>
 
 <div id="map">
   <button id="map-fullscreen-btn" title="Цял екран" onclick="toggleMapFullscreen()">⛶</button>
@@ -1434,6 +1445,27 @@ function scrollToMap() {
   setView('map');
   document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
 }
+
+// ── Fixed top-bar: hide header on scroll, always show controls ──
+(function() {
+  const topBar  = document.getElementById('top-bar');
+  const spacer  = document.getElementById('top-bar-spacer');
+  const header  = document.querySelector('header');
+
+  function syncHeight() {
+    const h = topBar.offsetHeight;
+    spacer.style.height = h + 'px';
+    document.documentElement.style.setProperty('--topbar-h', h + 'px');
+  }
+
+  syncHeight();
+  new ResizeObserver(syncHeight).observe(topBar);
+  header.addEventListener('transitionend', syncHeight);
+
+  window.addEventListener('scroll', function() {
+    header.classList.toggle('header-hidden', window.scrollY > 10);
+  }, { passive: true });
+})();
 
 
 // ── Map fullscreen ──
