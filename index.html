@@ -1188,6 +1188,7 @@ const shelters = [
     gallery: [],
     phone: "0293141464", facebook: "https://www.facebook.com/ecoravnovesie/", website: "https://ecoravnovesie.sofia.bg/",
     adoptUrl: "https://ecoravnovesie.sofia.bg/shelter/priyut-gorni-bogrov",
+    walkUrl: "https://ecoravnovesie.sofia.bg/walk",
     donate: null
   },
   {
@@ -1195,15 +1196,16 @@ const shelters = [
     city: "София",
     address: "кв. Сеславци, стопански двор, 1808 София",
     lat: 42.7505, lng: 23.5133,
-    walkDays: ["Събота"],
-    walkTime: "10:00 – 14:00 (събота)",
-    walkInfo: "Разходки всяка събота от 10:00 до 14:00 ч. Приютът съществува от 2006 г. и е специализиран за насърчаване на осиновяването — предимно бебета и кучета под 3-годишна възраст, с по-дребни размери. Капацитет: 100 места. Осиновяване: понеделник–петък 9:00–15:00 ч. Допълнителен телефон: 0885902375.",
+    walkDays: ["Събота","Неделя"],
+    walkTime: "10:00 – 14:00 (събота и неделя)",
+    walkInfo: "Разходки всяка събота и неделя от 10:00 до 14:00 ч. Приютът съществува от 2006 г. и е специализиран за насърчаване на осиновяването — предимно бебета и кучета под 3-годишна възраст, с по-дребни размери. Капацитет: 100 места. Осиновяване: понеделник–петък 9:00–15:00 ч. Допълнителен телефон: 0885902375.",
     needs: [
       "Осиновители — бебета и млади кучета чакат своя дом"
     ],
     gallery: [],
     phone: "0293141464", facebook: "https://www.facebook.com/ecoravnovesie/", website: "https://ecoravnovesie.sofia.bg/",
     adoptUrl: "https://ecoravnovesie.sofia.bg/shelter/priyut-seslavtsi",
+    walkUrl: "https://ecoravnovesie.sofia.bg/walk",
     donate: null
   },
   {
@@ -1211,15 +1213,16 @@ const shelters = [
     city: "София",
     address: "ул. Гео Милев 164, Складово-производствена зона Слатина, София",
     lat: 42.6781, lng: 23.3854,
-    walkDays: ["Събота"],
-    walkTime: "10:00 – 14:00 (събота)",
-    walkInfo: "Разходки всяка събота от 10:00 до 14:00 ч. Приютът е изграден през 2008 г. в сътрудничество с немска фондация. Разполага с 100 места — предимно млади и малки кучета (под и над 10 кг), на възраст от 1 до 10+ години. Осиновяване: понеделник–петък 9:00–15:00 ч.",
+    walkDays: ["Събота","Неделя"],
+    walkTime: "10:00 – 14:00 (събота и неделя)",
+    walkInfo: "Разходки всяка събота и неделя от 10:00 до 14:00 ч. Приютът е изграден през 2008 г. в сътрудничество с немска фондация. Разполага с 100 места — предимно млади и малки кучета (под и над 10 кг), на възраст от 1 до 10+ години. Осиновяване: понеделник–петък 9:00–15:00 ч.",
     needs: [
       "Осиновители — млади и малки кучета чакат своя дом"
     ],
     gallery: [],
     phone: "0293141464", facebook: "https://www.facebook.com/ecoravnovesie/", website: "https://ecoravnovesie.sofia.bg/",
     adoptUrl: "https://ecoravnovesie.sofia.bg/shelter/priyut-slatina",
+    walkUrl: "https://ecoravnovesie.sofia.bg/walk",
     donate: null
   }
 ];
@@ -1394,6 +1397,7 @@ function openPanel(idx) {
   if (s.instagram) links += `<a class="primary" href="${s.instagram}" target="_blank">Instagram</a>`;
   if (s.website)   links += `<a class="primary" href="${s.website}" target="_blank">Уебсайт</a>`;
   if (s.adoptUrl)  links += `<a class="primary" style="background:#e07b1a;" href="${s.adoptUrl}" target="_blank">🐾 Осинови</a>`;
+  if (s.walkUrl)   links += `<a class="primary" style="background:#5a9e4c;" href="${s.walkUrl}" target="_blank">🦮 Запиши се за разходка</a>`;
   if (links) html += `<div class="panel-section"><div class="panel-section-title">Контакти</div><div class="panel-links">${links}</div></div>`;
 
   document.getElementById('panel-body').innerHTML = html;
@@ -1480,6 +1484,7 @@ function buildCatalogue(list) {
     if (s.instagram) links += `<a class="card-link primary" href="${s.instagram}" target="_blank" onclick="event.stopPropagation()">Instagram</a>`;
     if (s.website)   links += `<a class="card-link primary" href="${s.website}" target="_blank" onclick="event.stopPropagation()">Уебсайт</a>`;
     if (s.adoptUrl)  links += `<a class="card-link primary" style="background:#e07b1a;" href="${s.adoptUrl}" target="_blank" onclick="event.stopPropagation()">🐾 Осинови</a>`;
+    if (s.walkUrl)   links += `<a class="card-link primary" style="background:#5a9e4c;" href="${s.walkUrl}" target="_blank" onclick="event.stopPropagation()">🦮 Запиши се</a>`;
     const linksHtml = links ? `<div class="card-back-links">${links}</div>` : '';
 
     return `
