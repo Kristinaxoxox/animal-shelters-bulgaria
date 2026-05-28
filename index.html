@@ -28,16 +28,8 @@
       gap: 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       overflow: visible;
-      position: sticky;
-      top: 0;
+      position: relative;
       z-index: 1000;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    header.header-hidden {
-      transform: translateY(-100%);
-      opacity: 0;
-      pointer-events: none;
-      margin-bottom: 0;
     }
     header img.logo {
       height: 110px; width: auto; display: block;
@@ -1443,19 +1435,6 @@ function scrollToMap() {
   document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ── Hide header when scrolled down, show only when back at top ──
-(function() {
-  const THRESHOLD = 10;
-  window.addEventListener('scroll', function() {
-    const y = window.scrollY;
-    const header = document.querySelector('header');
-    if (y <= THRESHOLD) {
-      header.classList.remove('header-hidden');
-    } else {
-      header.classList.add('header-hidden');
-    }
-  }, { passive: true });
-})();
 
 // ── Map fullscreen ──
 let mapIsFullscreen = false;
