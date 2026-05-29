@@ -186,7 +186,7 @@
     #catalogue {
       display: none;
       padding: 24px;
-      padding-bottom: 60px;
+      padding-bottom: 40px;
     }
     #catalogue.visible { display: block; }
 
@@ -197,6 +197,33 @@
       max-width: 1200px;
       margin: 0 auto;
     }
+
+    /* Pagination */
+    .catalogue-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 28px 0 8px;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      background: white;
+      border: 1.5px solid #e8b07a;
+      color: #cd6a18;
+      border-radius: 8px;
+      min-width: 36px; height: 36px;
+      padding: 0 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+    }
+    .page-btn:hover:not(:disabled) { background: #fdf0e4; }
+    .page-btn.active { background: #cd6a18; color: white; border-color: #cd6a18; }
+    .page-btn:disabled { opacity: 0.3; cursor: default; }
+    .page-dots { color: #bbb; font-size: 0.9rem; padding: 0 2px; line-height: 36px; }
 
     /* ══════════════════════════════════
        FLIP CARD
@@ -1508,86 +1535,127 @@ shelters.forEach(s => {
   markers.push(marker);
 });
 
-// ── Catalogue ──
-function buildCatalogue(list) {
-  const grid = document.getElementById('catalogue');
+// ── Pagination ──
+let currentPage = 0;
+let _pagedList = [];
+
+function cardsPerPage() {
+  const w = window.innerWidth;
+  if (w <= 640) return 4;
+  if (w <= 900) return 8;
+  return 12;
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderPagedCatalogue();
+  document.getElementById('catalogue').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderPagination(total, perPage) {
+  const totalPages = Math.ceil(total / perPage);
+  if (totalPages <= 1) return '';
+  const p = currentPage;
+  let html = `<div class="catalogue-pagination">`;
+  html += `<button class="page-btn" onclick="goToPage(${p-1})" ${p===0?'disabled':''}>‹</button>`;
+
+  const pages = [];
+  for (let i = 0; i < totalPages; i++) {
+    if (i === 0 || i === totalPages-1 || Math.abs(i - p) <= 1) pages.push(i);
+    else if (pages[pages.length-1] !== '…') pages.push('…');
+  }
+  pages.forEach(i => {
+    if (i === '…') html += `<span class="page-dots">…</span>`;
+    else html += `<button class="page-btn${i===p?' active':''}" onclick="goToPage(${i})">${i+1}</button>`;
+  });
+
+  html += `<button class="page-btn" onclick="goToPage(${p+1})" ${p===totalPages-1?'disabled':''}>›</button>`;
+  html += `</div>`;
+  return html;
+}
+
+function renderPagedCatalogue() {
+  const list = _pagedList;
+  const wrap = document.getElementById('catalogue');
   if (list.length === 0) {
-    grid.innerHTML = `<div style="text-align:center;padding:60px 20px;color:#aaa;font-size:0.95rem;">Няма намерени приюти.</div>`;
+    wrap.innerHTML = `<div style="text-align:center;padding:60px 20px;color:#aaa;font-size:0.95rem;">Няма намерени приюти.</div>`;
     return;
   }
-  grid.innerHTML = `<div class="catalogue-grid">${list.map((s) => {
-    const idx = shelters.indexOf(s);
-    const days = s.walkDays.map(d => `<span class="card-tag">${d}</span>`).join('');
+  const perPage = cardsPerPage();
+  const start = currentPage * perPage;
+  const pageList = list.slice(start, start + perPage);
+  wrap.innerHTML = `<div class="catalogue-grid">${pageList.map((s) => buildCard(s)).join('')}</div>` + renderPagination(list.length, perPage);
+  equalizeCards();
+}
 
-    const hasImgs = s.gallery && s.gallery.length > 0;
-    const galleryJson = JSON.stringify(s.gallery || []);
-    const dots = hasImgs && s.gallery.length > 1
-      ? `<div class="card-img-dots">${s.gallery.map((_,i) => `<div class="card-img-dot${i===0?' active':''}" onclick="event.stopPropagation();cardImgGo(${idx},${i})"></div>`).join('')}</div>`
-      : '';
-    const arrows = hasImgs && s.gallery.length > 1
-      ? `<button class="card-img-arrow prev" onclick="event.stopPropagation();cardImgNav(${idx},-1)">&#8249;</button>
-         <button class="card-img-arrow next" onclick="event.stopPropagation();cardImgNav(${idx},1)">&#8250;</button>`
-      : '';
-    const cardImgHtml = hasImgs
-      ? `<div class="card-image-wrap" data-idx="${idx}" data-cur="0">
-           <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name}" style="cursor:zoom-in;" onclick="event.stopPropagation();openCardLightbox(${idx})">
-           ${arrows}${dots}
-         </div>`
-      : `<div class="card-image-placeholder">🐾</div>`;
+// ── Catalogue ──
+function buildCatalogue(list) {
+  _pagedList = list;
+  currentPage = 0;
+  renderPagedCatalogue();
+}
 
-    const needsHtml = s.needs && s.needs.length > 0 ? `
-      <div class="card-needs-back">
-        <div class="card-back-section-title">Нуждае се от</div>
-        ${s.needs.map(n => `<div class="card-need-item">${n}</div>`).join('')}
-      </div>` : '';
-
-    const donateCardHtml = buildDonateCard(s.donate);
-
-    let links = '';
-    if (s.phone)     links += `<a class="card-link secondary" href="tel:${s.phone}" onclick="event.stopPropagation()">📞 ${s.phone}</a>`;
-    if (s.facebook)  links += `<a class="card-link primary" href="${s.facebook}" target="_blank" onclick="event.stopPropagation()">Facebook</a>`;
-    if (s.instagram) links += `<a class="card-link primary" href="${s.instagram}" target="_blank" onclick="event.stopPropagation()">Instagram</a>`;
-    if (s.website)   links += `<a class="card-link primary" href="${s.website}" target="_blank" onclick="event.stopPropagation()">Уебсайт</a>`;
-    if (s.adoptUrl)  links += `<a class="card-link primary" style="background:#e07b1a;" href="${s.adoptUrl}" target="_blank" onclick="event.stopPropagation()">🐾 Осинови</a>`;
-    if (s.walkUrl)   links += `<a class="card-link primary" style="background:#5a9e4c;" href="${s.walkUrl}" target="_blank" onclick="event.stopPropagation()">🦮 Запиши се</a>`;
-    const linksHtml = links ? `<div class="card-back-links">${links}</div>` : '';
-
-    return `
-      <div class="shelter-card" data-idx="${idx}">
-        <div class="card-inner">
-
-          <div class="card-front" onclick="flipCard(this.closest('.shelter-card'))">
-            ${cardImgHtml}
-            <div class="card-body">
-              <div class="card-name">${s.name}</div>
-              <div class="card-city">📍 ${s.city} — ${s.address}</div>
-              <div class="card-tags">${days}</div>
-              <div class="card-row"><span class="card-row-icon">🕙</span>${s.walkTime}</div>
-              <div class="card-spacer"></div>
-              <div class="card-flip-hint">Натисни за детайли →</div>
-            </div>
+function buildCard(s) {
+  const idx = shelters.indexOf(s);
+  const days = s.walkDays.map(d => `<span class="card-tag">${d}</span>`).join('');
+  const hasImgs = s.gallery && s.gallery.length > 0;
+  const dots = hasImgs && s.gallery.length > 1
+    ? `<div class="card-img-dots">${s.gallery.map((_,i) => `<div class="card-img-dot${i===0?' active':''}" onclick="event.stopPropagation();cardImgGo(${idx},${i})"></div>`).join('')}</div>`
+    : '';
+  const arrows = hasImgs && s.gallery.length > 1
+    ? `<button class="card-img-arrow prev" onclick="event.stopPropagation();cardImgNav(${idx},-1)">&#8249;</button>
+       <button class="card-img-arrow next" onclick="event.stopPropagation();cardImgNav(${idx},1)">&#8250;</button>`
+    : '';
+  const cardImgHtml = hasImgs
+    ? `<div class="card-image-wrap" data-idx="${idx}" data-cur="0">
+         <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name}" style="cursor:zoom-in;" onclick="event.stopPropagation();openCardLightbox(${idx})">
+         ${arrows}${dots}
+       </div>`
+    : `<div class="card-image-placeholder">🐾</div>`;
+  const needsHtml = s.needs && s.needs.length > 0
+    ? `<div class="card-needs-back"><div class="card-back-section-title">Нуждае се от</div>${s.needs.map(n => `<div class="card-need-item">${n}</div>`).join('')}</div>`
+    : '';
+  const donateCardHtml = buildDonateCard(s.donate);
+  let links = '';
+  if (s.phone)     links += `<a class="card-link secondary" href="tel:${s.phone}" onclick="event.stopPropagation()">📞 ${s.phone}</a>`;
+  if (s.facebook)  links += `<a class="card-link primary" href="${s.facebook}" target="_blank" onclick="event.stopPropagation()">Facebook</a>`;
+  if (s.instagram) links += `<a class="card-link primary" href="${s.instagram}" target="_blank" onclick="event.stopPropagation()">Instagram</a>`;
+  if (s.website)   links += `<a class="card-link primary" href="${s.website}" target="_blank" onclick="event.stopPropagation()">Уебсайт</a>`;
+  if (s.adoptUrl)  links += `<a class="card-link primary" style="background:#e07b1a;" href="${s.adoptUrl}" target="_blank" onclick="event.stopPropagation()">🐾 Осинови</a>`;
+  if (s.walkUrl)   links += `<a class="card-link primary" style="background:#5a9e4c;" href="${s.walkUrl}" target="_blank" onclick="event.stopPropagation()">🦮 Запиши се</a>`;
+  const linksHtml = links ? `<div class="card-back-links">${links}</div>` : '';
+  return `
+    <div class="shelter-card" data-idx="${idx}">
+      <div class="card-inner">
+        <div class="card-front" onclick="flipCard(this.closest('.shelter-card'))">
+          ${cardImgHtml}
+          <div class="card-body">
+            <div class="card-name">${s.name}</div>
+            <div class="card-city">📍 ${s.city} — ${s.address}</div>
+            <div class="card-tags">${days}</div>
+            <div class="card-row"><span class="card-row-icon">🕙</span>${s.walkTime}</div>
+            <div class="card-spacer"></div>
+            <div class="card-flip-hint">Натисни за детайли →</div>
           </div>
-
-          <div class="card-back" onclick="openPanel(${idx})" style="cursor:pointer;">
-            <div class="card-back-header">
-              <div class="card-back-name">${s.name}</div>
-              <button class="card-flip-back-btn" onclick="event.stopPropagation();flipCard(this.closest('.shelter-card'))">←</button>
-            </div>
-            <div class="card-back-body">
-              <div>
-                <div class="card-back-section-title">Как да се запишеш</div>
-                <div style="font-size:0.82rem;color:#444;line-height:1.5;">${s.walkInfo}</div>
-              </div>
-              ${needsHtml}
-              ${donateCardHtml}
-              ${linksHtml}
-              <button class="card-open-panel-btn" onclick="openPanel(${idx})">Виж пълен профил →</button>
-            </div>
-          </div>
-
         </div>
-      </div>`;
-  }).join('')}</div>`;
+        <div class="card-back" onclick="openPanel(${idx})" style="cursor:pointer;">
+          <div class="card-back-header">
+            <div class="card-back-name">${s.name}</div>
+            <button class="card-flip-back-btn" onclick="event.stopPropagation();flipCard(this.closest('.shelter-card'))">←</button>
+          </div>
+          <div class="card-back-body">
+            <div>
+              <div class="card-back-section-title">Как да се запишеш</div>
+              <div style="font-size:0.82rem;color:#444;line-height:1.5;">${s.walkInfo}</div>
+            </div>
+            ${needsHtml}
+            ${donateCardHtml}
+            ${linksHtml}
+            <button class="card-open-panel-btn" onclick="openPanel(${idx})">Виж пълен профил →</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
 }
 
 // ── View toggle ──
@@ -1770,7 +1838,7 @@ let _resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(_resizeTimer);
   _resizeTimer = setTimeout(() => {
-    if (currentView === 'catalogue') equalizeCards();
+    if (currentView === 'catalogue') renderPagedCatalogue();
     map.invalidateSize();
   }, 250);
 });
