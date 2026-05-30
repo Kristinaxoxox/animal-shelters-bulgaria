@@ -1288,8 +1288,8 @@ const shelters = [
     city: "Варна",
     address: "гр. Варна",
     lat: 43.2141, lng: 27.9147,
-    walkDays: [],
-    walkTime: "",
+    walkDays: ["Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота"],
+    walkTime: "Пн–Пет 10:00–20:00 | Събота 12:00–19:00 | Неделя — затворено",
     walkInfo: "Фондация Animal Hope Varna работи за защита и намиране на домове за бездомни животни във Варна. За повече информация посетете сайта им или се свържете директно.",
     needs: [],
     gallery: ["images/animalhopevarna.jpg"],
@@ -1359,6 +1359,58 @@ const shelters = [
     needs: [],
     gallery: ["images/pavlikeni1.jpg","images/pavlikeni2.jpg"],
     phone: "0882865601", facebook: "https://www.facebook.com/DogShelterPavlikeni", website: "",
+    donate: null
+  },
+  {
+    name: "Приют за бездомни животни — Габрово",
+    city: "Габрово",
+    address: "местност Баевски дол, гр. Габрово",
+    lat: 42.8652, lng: 25.3050,
+    walkDays: ["Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота","Неделя"],
+    walkTime: "09:00 – 17:00 (всеки ден)",
+    walkInfo: "Един от малките, но професионални приюти в България. Животните живеят свободно боксово на територията на приюта и получават грижи от специализирани ветеринари. Всяко заловено животно се кастрира, обезпаразитява и ваксинира срещу бяс. При инциденти и наранявания се осигурява спешна ветеринарна помощ. Свободен достъп за граждани всеки ден от 09:00 до 17:00 ч.",
+    needs: [],
+    gallery: ["images/gabrovo1.jpg","images/gabrovo2.jpg"],
+    phone: "0886788077", facebook: "https://www.facebook.com/profile.php?id=100083194637514", website: "",
+    donate: null
+  },
+  {
+    name: "Общински приют за безстопанствени животни — Добрич",
+    city: "Добрич",
+    address: "ПЗ Запад, ул. Хан Тервел, посока местността Кобаклъка, 9300 Добрич",
+    lat: 43.5603, lng: 27.8080,
+    walkDays: ["Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота","Неделя"],
+    walkTime: "Пн–Пет 08:00–16:30 | Сб–Нд 08:00–12:00",
+    walkInfo: "За разходка се свържете предварително на посочените телефони. Приютът работи от 2010 г. и разполага с 104 места. Извършват се безплатни кастрации, обезпаразитяване, ваксинация и маркиране. Осиновяването е безплатно — животните са с микрочип.",
+    needs: [],
+    gallery: ["images/dobrich.jpg"],
+    phones: ["0886212114","0882636362","0585586033"], facebook: "https://www.facebook.com/people/Общински-приют-за-безстопанствени-животни-Добрич/100064482110981/", website: "",
+    donate: null
+  },
+  {
+    name: "Общински приют за кучета — Видин",
+    city: "Видин",
+    address: "местност Алимана, УПИ II-274 (преди с. Рупци), 3700 Видин",
+    lat: 43.9762, lng: 22.8700,
+    walkDays: [],
+    walkTime: "Свържете се предварително",
+    walkInfo: "За разходка се обадете предварително на посочения телефон. Основната цел на приюта е хуманно решаване на проблема с безстопанствените кучета — масова кастрация, обезпаразитяване, чипиране и търсене на дом за всяко животно.",
+    needs: [],
+    gallery: ["images/vidin1.jpg","images/vidin2.jpg","images/vidin3.jpg"],
+    phone: "0882648010", facebook: "https://www.facebook.com/profile.php?id=61575787683037", website: "https://vidin.bg",
+    donate: null
+  },
+  {
+    name: "Общински приют за безстопанствени кучета — Казанлък",
+    city: "Казанлък",
+    address: "гр. Казанлък 6100",
+    lat: 42.6167, lng: 25.3956,
+    walkDays: ["Понеделник","Вторник","Сряда","Четвъртък","Петък"],
+    walkTime: "08:00 – 17:00 (само делнични дни)",
+    walkInfo: "Приютът е отворен за посещения само в делничните дни от 08:00 до 17:00 ч. Събота и неделя — почивни дни. За повече информация се свържете на посочения телефон.",
+    needs: [],
+    gallery: ["images/kalanluk1.jpg","images/kazanluk2.jpg"],
+    phone: "0887311884", facebook: "https://www.facebook.com/opk.kazanlak", website: "https://kazanlak.bg",
     donate: null
   }
 ];
@@ -1528,7 +1580,8 @@ function openPanel(idx) {
   if (donateHtml) html += `<div class="panel-section">${donateHtml}</div>`;
 
   let links = '';
-  if (s.phone)     links += `<a class="secondary" href="tel:${s.phone}">📞 ${s.phone}</a>`;
+  const allPhones = s.phones || (s.phone ? [s.phone] : []);
+  allPhones.forEach(p => { links += `<a class="secondary" href="tel:${p}">📞 ${p}</a>`; });
   if (s.facebook)  links += `<a class="primary" href="${s.facebook}" target="_blank">Facebook</a>`;
   if (s.instagram) links += `<a class="primary" href="${s.instagram}" target="_blank">Instagram</a>`;
   if (s.website)   links += `<a class="primary" href="${s.website}" target="_blank">Уебсайт</a>`;
@@ -1683,7 +1736,8 @@ function buildCard(s) {
     : '';
   const donateCardHtml = buildDonateCard(s.donate);
   let links = '';
-  if (s.phone)     links += `<a class="card-link secondary" href="tel:${s.phone}" onclick="event.stopPropagation()">📞 ${s.phone}</a>`;
+  const allPhones = s.phones || (s.phone ? [s.phone] : []);
+  allPhones.forEach(p => { links += `<a class="card-link secondary" href="tel:${p}" onclick="event.stopPropagation()">📞 ${p}</a>`; });
   if (s.facebook)  links += `<a class="card-link primary" href="${s.facebook}" target="_blank" onclick="event.stopPropagation()">Facebook</a>`;
   if (s.instagram) links += `<a class="card-link primary" href="${s.instagram}" target="_blank" onclick="event.stopPropagation()">Instagram</a>`;
   if (s.website)   links += `<a class="card-link primary" href="${s.website}" target="_blank" onclick="event.stopPropagation()">Уебсайт</a>`;
