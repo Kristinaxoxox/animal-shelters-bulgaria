@@ -58,6 +58,36 @@
       margin-top: 4px; font-weight: 400; letter-spacing: 0.3px;
     }
 
+    /* Social buttons in header */
+    .header-socials {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header-social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      color: white;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .header-social-btn:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.7);
+    }
+    .header-social-btn svg {
+      width: 17px; height: 17px;
+      fill: white;
+    }
+
     /* Mobile map shortcut button — hidden on desktop */
     .header-map-btn {
       display: none;
@@ -704,6 +734,9 @@
         display: block;
         font-size: 0.75rem;
       }
+      /* Hide socials on mobile — use the 🗺 button instead */
+      .header-socials { display: none; }
+
       /* Map button — top right corner */
       .header-map-btn {
         display: flex !important;
@@ -887,6 +920,17 @@
   <div class="header-text">
     <h1>Приюти за животни в България</h1>
     <p>Намери приют близо до теб и се запиши за разходка</p>
+  </div>
+  <div class="header-socials">
+    <a class="header-social-btn" href="https://www.facebook.com/MechoNgo" target="_blank" title="Facebook">
+      <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    </a>
+    <a class="header-social-btn" href="https://www.instagram.com/mechoandfriendsinsta" target="_blank" title="Instagram">
+      <svg viewBox="0 0 24 24" style="fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+    </a>
+    <a class="header-social-btn" href="https://www.mecho-ngo.bg/" target="_blank" title="Уебсайт">
+      <svg viewBox="0 0 24 24" style="fill:none;stroke:white;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </a>
   </div>
   <button class="header-map-btn" onclick="scrollToMap()" title="Към картата">🗺</button>
 </header>
