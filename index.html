@@ -847,19 +847,28 @@
     /* ── Footer ── */
     footer {
       background: #2a1400;
-      color: rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.45);
       text-align: center;
-      padding: 12px 20px;
-      font-size: 0.75rem;
-      letter-spacing: 0.3px;
+      padding: 14px 20px;
+      font-size: 0.68rem;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-wrap: wrap;
       gap: 6px;
     }
-    .footer-divider { opacity: 0.35; }
-    footer span:last-child { color: rgba(255,255,255,0.75); }
+    .footer-divider { opacity: 0.25; }
+    footer span:last-child { color: rgba(255,255,255,0.7); }
+    footer a.footer-credit {
+      color: #e8a05a;
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      transition: color 0.2s;
+    }
+    footer a.footer-credit:hover { color: #f5c07a; }
 
     /* Very small phones */
     @media (max-width: 360px) {
@@ -926,7 +935,7 @@
 <footer>
   <span>© 2025 Мечо и Приятели — срещу насилието над животни</span>
   <span class="footer-divider">·</span>
-  <span>Изработено от Kristina B</span>
+  <span>Изработено от <a href="contact.html" class="footer-credit">Kristina B</a></span>
 </footer>
 
 <!-- Overlay + Side Panel -->
@@ -1479,6 +1488,19 @@ const shelters = [
     needs: [],
     gallery: ["images/kyustendil.jpg"],
     phone: "0882885438", facebook: "https://www.facebook.com/profile.php?id=61556724272830", instagram: "https://www.instagram.com/kyustendildogshelter", website: "",
+    donate: null
+  },
+  {
+    name: "Sanctuary — Приют за безстопанствени животни",
+    city: "Разград",
+    address: "ул. Костур №30, гр. Разград 7200",
+    lat: 43.5254, lng: 26.5247,
+    walkDays: ["Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота"],
+    walkTime: "Пн–Пет 09:00–12:00 и 13:00–16:00 | Събота 09:00–12:00",
+    walkInfo: "Приютът е отворен в работно време. За въпроси: shelter@sanctuary.bg или на посочения телефон.",
+    needs: [],
+    gallery: ["images/razgrad.jpg"],
+    phone: "084248868", facebook: "", website: "https://sanctuary.bg",
     donate: null
   }
 ];
