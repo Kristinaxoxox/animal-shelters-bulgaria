@@ -898,6 +898,36 @@
       .suggestion-btn { padding: 5px 10px; font-size: 0.75rem; }
     }
 
+    /* ── About section ── */
+    .about-section {
+      background: #fff;
+      border-top: 1px solid #f5d4ae;
+      padding: 48px 24px;
+    }
+    .about-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .about-inner h2 {
+      color: #cd6a18;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      letter-spacing: 0.3px;
+    }
+    .about-inner p {
+      color: #5a5048;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .about-inner p:last-child { margin-bottom: 0; }
+    @media (max-width: 640px) {
+      .about-section { padding: 36px 18px; }
+      .about-inner h2 { font-size: 1.2rem; }
+      .about-inner p { font-size: 0.88rem; }
+    }
+
     /* ── Footer ── */
     footer {
       background: #2a1400;
@@ -1022,6 +1052,15 @@
   <button id="map-fullscreen-btn" title="Цял екран" onclick="toggleMapFullscreen()">⛶</button>
 </div>
 <div id="catalogue"></div>
+
+<section class="about-section">
+  <div class="about-inner">
+    <h2>За проекта „Приюти за животни в България"</h2>
+    <p>Тази интерактивна карта е създадена от екипа на „Мечо и Приятели" — доброволческа инициатива срещу насилието над животни в България. Целта е на едно място да бъде събрана актуална информация за общинските и частните приюти за бездомни кучета и котки в страната.</p>
+    <p>Тук ще намериш адреси, работно време, телефони за контакт и насоки как да посетиш приют близо до теб, да се запишеш за разходка с куче или да помогнеш с дарение на храна и материали. Всеки приют разполага с галерия от снимки и информация какво точно е нужно в момента.</p>
+    <p>Ако представляваш приют и искаш да добавиш или коригираш информация на картата, свържи се с нас през социалните мрежи в горния десен ъгъл на страницата.</p>
+  </div>
+</section>
 
 <footer>
   <span>© 2025 Мечо и Приятели — срещу насилието над животни</span>
