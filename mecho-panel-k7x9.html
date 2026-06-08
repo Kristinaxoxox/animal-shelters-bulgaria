@@ -76,6 +76,14 @@
     .sc-btns{display:flex;gap:7px;flex-shrink:0;}
     .empty{text-align:center;padding:50px 20px;color:var(--dim);font-size:0.9rem;}
 
+    /* ── Пагинация ── */
+    .pagination{display:flex;align-items:center;justify-content:center;gap:8px;padding:18px 20px 4px;}
+    .page-btn{background:#fff;border:2px solid var(--border);border-radius:8px;padding:8px 16px;font-family:inherit;font-size:0.86rem;font-weight:700;cursor:pointer;color:var(--text);transition:all 0.15s;}
+    .page-btn:hover{border-color:var(--orange);color:var(--orange);}
+    .page-btn.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+    .page-btn:disabled{opacity:0.35;cursor:not-allowed;}
+    .page-info{font-size:0.82rem;color:var(--dim);padding:0 6px;}
+
     /* ── Модал ── */
     .overlay{position:fixed;inset:0;background:rgba(42,20,0,0.52);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
     .overlay.open{display:flex;}
@@ -190,7 +198,7 @@
   <div class="toolbar">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" id="search" placeholder="Търси по град или наименование..." oninput="renderList()"/>
+      <input type="text" id="search" placeholder="Търси по град или наименование..." oninput="listPage=0;renderList()"/>
     </div>
     <span class="pill" id="count-pill">0 приюта</span>
     <div style="flex:1"></div>
@@ -376,6 +384,8 @@ let shelters = [];
 let editIdx = null;
 let deleteIdx = null;
 let hasChanges = false;
+let listPage = 0;
+const PAGE_SIZE = 20;
 
 // ── Влизане ──
 function doLogin() {
@@ -415,17 +425,36 @@ async function loadShelters() {
 // ── Списък ──
 function renderList() {
   const q = document.getElementById('search').value.toLowerCase().trim();
-  const items = shelters.map((s,i)=>({s,i})).filter(({s}) =>
+
+  // Sort alphabetically, then filter by search
+  const sorted = shelters
+    .map((s,i) => ({s, i}))
+    .sort((a,b) => a.s.name.localeCompare(b.s.name, 'bg'));
+
+  const items = sorted.filter(({s}) =>
     !q || s.name.toLowerCase().includes(q) || s.city.toLowerCase().includes(q)
   );
+
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  if (listPage >= totalPages) listPage = totalPages - 1;
+
+  const pageItems = items.slice(listPage * PAGE_SIZE, (listPage + 1) * PAGE_SIZE);
+
   document.getElementById('count-pill').textContent = items.length + ' / ' + shelters.length + ' приюта';
+
+  const listEl = document.getElementById('list');
+
   if (!items.length) {
-    document.getElementById('list').innerHTML = '<div class="empty">Няма намерени приюти.</div>';
+    listEl.innerHTML = '<div class="empty">Няма намерени приюти.</div>';
     return;
   }
-  document.getElementById('list').innerHTML = items.map(({s,i}) => `
+
+  // Global rank = position in the full sorted+filtered list (1-based)
+  const startRank = listPage * PAGE_SIZE + 1;
+
+  const rows = pageItems.map(({s, i}, pi) => `
     <div class="sc">
-      <div class="sc-n">${i+1}</div>
+      <div class="sc-n">${startRank + pi}</div>
       <div class="sc-info">
         <div class="sc-name">${s.name}</div>
         <div class="sc-sub">📍 ${s.city}${s.phone ? ' · 📞 '+s.phone : ''}${s.walkDays&&s.walkDays.length ? ' · 🗓️ '+s.walkDays.join(', ') : ''}</div>
@@ -435,6 +464,30 @@ function renderList() {
         <button class="btn btn-red btn-sm" onclick="askDelete(${i})">🗑️</button>
       </div>
     </div>`).join('');
+
+  // Pagination controls
+  let pager = '';
+  if (totalPages > 1) {
+    const prevDisabled = listPage === 0 ? 'disabled' : '';
+    const nextDisabled = listPage === totalPages - 1 ? 'disabled' : '';
+    let pageNums = '';
+    for (let p = 0; p < totalPages; p++) {
+      pageNums += `<button class="page-btn${p === listPage ? ' active' : ''}" onclick="goPage(${p})">${p+1}</button>`;
+    }
+    pager = `<div class="pagination">
+      <button class="page-btn" onclick="goPage(${listPage-1})" ${prevDisabled}>← Назад</button>
+      ${pageNums}
+      <button class="page-btn" onclick="goPage(${listPage+1})" ${nextDisabled}>Напред →</button>
+    </div>`;
+  }
+
+  listEl.innerHTML = rows + pager;
+}
+
+function goPage(p) {
+  listPage = p;
+  renderList();
+  document.getElementById('list').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 // ── Форма ──
@@ -528,6 +581,7 @@ function saveShelter() {
     toast('✅ Запазен: ' + name, 'ok');
   }
 
+  shelters.sort((a,b) => a.name.localeCompare(b.name, 'bg'));
   markChanged();
   closeForm();
   renderList();
