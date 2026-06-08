@@ -18,24 +18,14 @@
     "gallery": [
       "images/mezdra1.jpg",
       "images/mezdra2.jpg",
-      "images/mezdra3.jpg",
       "images/mezdra4.jpg",
+      "images/mezdra3.jpg",
       "images/mezdra5.jpg",
       "images/mezdra6.jpg"
     ],
-    "phone": "",
     "facebook": "https://www.facebook.com/AnimalHelpMezdra",
     "website": "https://animalhelpmezdra.com",
-    "donate": {
-      "iban": "BG79UBBS88881000962248",
-      "bic": "UBBSBGSF",
-      "bank": "Обединена Българска Банка (ОББ)",
-      "recipient": "СНЦОП В помощ на животните в Мездра",
-      "note": "Дарение",
-      "paypal": "https://www.paypal.com/donate?token=wZbfqvA2KnjjmPbAHQfxVRtOQMbdNwS8w2ybixLfou5oaY-YB9PwQSMvSY8JH86BBXyR-zjHkcfEy1o9",
-      "revolut": "",
-      "other": "https://animalhelpmezdra.com/donate"
-    }
+    "donate": "https://animalhelpmezdra.com/donate"
   },
   {
     "name": "Общински приют за безстопанствени кучета — Каменар",
