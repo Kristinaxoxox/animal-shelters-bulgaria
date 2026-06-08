@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Админ — Приюти за животни</title>
+  <meta name="robots" content="noindex,nofollow"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --bg:#fdf5ec;--card:#fff;--orange:#cd6a18;--orange2:#e8a05a;
+      --border:#f5d4ae;--text:#3a3a3a;--dim:#9a8878;
+      --red:#d94f4f;--green:#3a9e5f;
+    }
+    body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    /* ── Влизане ── */
+    #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+    .login-box{background:var(--card);border:2px solid var(--border);border-radius:16px;padding:36px;width:100%;max-width:360px;text-align:center;box-shadow:0 4px 24px rgba(205,106,24,0.1);}
+    .login-box .paw{font-size:2.8rem;margin-bottom:10px;}
+    .login-box h1{font-size:1.25rem;color:var(--orange);margin-bottom:4px;}
+    .login-box p{color:var(--dim);font-size:0.84rem;margin-bottom:22px;}
+    .login-box input{width:100%;padding:13px;border:2px solid var(--border);border-radius:10px;font-size:1rem;font-family:inherit;text-align:center;letter-spacing:3px;margin-bottom:8px;background:var(--bg);}
+    .login-box input:focus{outline:none;border-color:var(--orange);}
+    .login-box input.shake{animation:shake 0.4s;}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+    .login-err{color:var(--red);font-size:0.82rem;min-height:18px;margin-bottom:10px;}
+
+    /* ── Бутони ── */
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 22px;border-radius:10px;border:none;font-family:inherit;font-weight:700;font-size:0.88rem;cursor:pointer;transition:all 0.18s;text-decoration:none;}
+    .btn-orange{background:var(--orange);color:#fff;}
+    .btn-orange:hover{background:#b85c14;}
+    .btn-outline{background:#fff;color:var(--text);border:2px solid var(--border);}
+    .btn-outline:hover{border-color:var(--orange);color:var(--orange);}
+    .btn-red{background:var(--red);color:#fff;}
+    .btn-red:hover{opacity:0.85;}
+    .btn-green{background:var(--green);color:#fff;}
+    .btn-green:hover{opacity:0.88;}
+    .btn-sm{padding:7px 14px;font-size:0.8rem;}
+    .btn:disabled{opacity:0.45;cursor:not-allowed;}
+    .btn-full{width:100%;justify-content:center;}
+
+    /* ── Топ лента ── */
+    #app{display:none;}
+    .topbar{background:var(--orange);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:50;}
+    .topbar h1{font-size:0.95rem;color:#fff;font-weight:800;}
+    .topbar-right{display:flex;gap:8px;}
+
+    /* ── Инструменти ── */
+    .toolbar{background:#fff;border-bottom:2px solid var(--border);padding:12px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .search-wrap{position:relative;flex:1;min-width:180px;max-width:320px;}
+    .search-wrap input{width:100%;padding:9px 12px 9px 36px;border:2px solid var(--border);border-radius:10px;font-size:0.88rem;font-family:inherit;background:var(--bg);}
+    .search-wrap input:focus{outline:none;border-color:var(--orange);}
+    .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none;}
+    .pill{background:var(--orange);color:#fff;padding:4px 12px;border-radius:20px;font-size:0.76rem;font-weight:700;white-space:nowrap;}
+
+    /* ── Лента за сваляне ── */
+    #dl-bar{background:#e8f5e9;border-bottom:2px solid #a5d6a7;padding:11px 20px;display:none;align-items:center;gap:12px;flex-wrap:wrap;}
+    #dl-bar span{font-size:0.86rem;color:var(--green);font-weight:700;}
+
+    /* ── Списък ── */
+    .list{padding:16px 20px;max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:8px;}
+    .sc{background:#fff;border:2px solid var(--border);border-radius:12px;padding:15px 18px;display:flex;align-items:center;gap:14px;transition:border-color 0.2s;}
+    .sc:hover{border-color:var(--orange2);}
+    .sc-n{font-size:0.75rem;color:var(--dim);font-weight:700;min-width:24px;text-align:center;}
+    .sc-info{flex:1;min-width:0;}
+    .sc-name{font-weight:700;font-size:0.94rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sc-sub{font-size:0.78rem;color:var(--dim);margin-top:2px;}
+    .sc-btns{display:flex;gap:7px;flex-shrink:0;}
+    .empty{text-align:center;padding:50px 20px;color:var(--dim);font-size:0.9rem;}
+
+    /* ── Модал ── */
+    .overlay{position:fixed;inset:0;background:rgba(42,20,0,0.52);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
+    .overlay.open{display:flex;}
+    .modal{background:#fff;border-radius:16px;width:100%;max-width:620px;overflow:hidden;box-shadow:0 10px 48px rgba(0,0,0,0.22);margin:auto;}
+    .modal-hdr{background:var(--orange);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;}
+    .modal-hdr h2{color:#fff;font-size:1.05rem;font-weight:800;}
+    .modal-hdr .close-btn{background:rgba(255,255,255,0.22);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+    .modal-hdr .close-btn:hover{background:rgba(255,255,255,0.38);}
+
+    .modal-body{padding:22px;display:flex;flex-direction:column;gap:0;}
+
+    /* ── Секции ── */
+    .fsec{margin-bottom:18px;}
+    .fsec-title{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--orange);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .fsec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+    .row2{display:flex;gap:12px;}
+    .row2 .f{flex:1;}
+
+    /* ── Полета ── */
+    .f{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+    .f:last-child{margin-bottom:0;}
+    .f label{font-size:0.72rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:0.4px;}
+    .f input,.f textarea,.f select{padding:10px 13px;border:2px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:inherit;color:var(--text);background:var(--bg);width:100%;}
+    .f input:focus,.f textarea:focus{outline:none;border-color:var(--orange);}
+    .f textarea{resize:vertical;min-height:68px;}
+    .f .hint{font-size:0.69rem;color:var(--dim);}
+    .f .hint a{color:var(--orange);}
+
+    /* ── Дни чипове ── */
+    .days{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+    .dc{padding:7px 14px;border-radius:20px;border:2px solid var(--border);background:#fff;color:var(--dim);cursor:pointer;font-size:0.82rem;font-family:inherit;font-weight:600;transition:all 0.15s;}
+    .dc.on{background:var(--orange);color:#fff;border-color:var(--orange);}
+
+    .modal-ftr{padding:16px 22px;border-top:2px solid var(--border);display:flex;gap:10px;justify-content:flex-end;background:#fff;}
+
+    /* ── Изтриване ── */
+    .del-ov{position:fixed;inset:0;background:rgba(42,20,0,0.55);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+    .del-ov.open{display:flex;}
+    .del-box{background:#fff;border-radius:16px;padding:30px;max-width:380px;width:100%;text-align:center;}
+    .del-box .di{font-size:2.2rem;margin-bottom:10px;}
+    .del-box h3{color:var(--red);margin-bottom:8px;}
+    .del-box p{color:var(--dim);font-size:0.86rem;margin-bottom:22px;line-height:1.5;}
+    .del-box .btns{display:flex;gap:10px;justify-content:center;}
+
+    /* ── Toast ── */
+    #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:11px 22px;border-radius:12px;font-size:0.86rem;font-weight:700;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.18);}
+    #toast.show{opacity:1;}
+    #toast.ok{background:var(--green);color:#fff;}
+    #toast.err{background:var(--red);color:#fff;}
+    #toast.info{background:var(--orange);color:#fff;}
+
+    /* ── Upload ── */
+    .upload-zone{border:2.5px dashed var(--border);border-radius:12px;padding:28px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg);margin-bottom:12px;}
+    .upload-zone:hover,.upload-zone.drag{border-color:var(--orange);background:#fff8f0;}
+    .upload-icon{font-size:2rem;margin-bottom:6px;}
+    .upload-text{font-weight:700;font-size:0.9rem;color:var(--text);margin-bottom:3px;}
+    .upload-hint{font-size:0.74rem;color:var(--dim);}
+    #img-previews{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+    .img-thumb{position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;border:2px solid var(--border);flex-shrink:0;}
+    .img-thumb img{width:100%;height:100%;object-fit:cover;}
+    .img-thumb .rm{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .img-thumb .rm:hover{background:var(--red);}
+    .img-thumb .dl{position:absolute;bottom:3px;left:3px;right:3px;background:var(--orange);color:#fff;border:none;border-radius:4px;font-size:0.6rem;font-weight:700;cursor:pointer;padding:2px 4px;font-family:inherit;}
+    .img-thumb .dl:hover{background:#b85c14;}
+    .img-processing{font-size:0.78rem;color:var(--dim);padding:8px 0;}
+  </style>
+</head>
+<body>
+
+<!-- ── Влизане ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="paw">🐾</div>
+    <h1>Мечо и Приятели</h1>
+    <p>Админ панел · Управление на приюти</p>
+    <input type="password" id="pw" placeholder="Парола" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="login-err" id="login-err"></div>
+    <button class="btn btn-orange btn-full" onclick="doLogin()">Влез →</button>
+  </div>
+</div>
+
+<!-- ── Главен екран ── -->
+<div id="app">
+  <div class="topbar">
+    <h1>🐾 Мечо и Приятели — Админ</h1>
+    <div class="topbar-right">
+      <a href="index.html" target="_blank" class="btn btn-outline btn-sm">Виж картата ↗</a>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Изход</button>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search" placeholder="Търси по град или наименование..." oninput="renderList()"/>
+    </div>
+    <span class="pill" id="count-pill">0 приюта</span>
+    <div style="flex:1"></div>
+    <button class="btn btn-orange" onclick="openForm(null)">＋ Добави нов приют</button>
+  </div>
+
+  <div id="dl-bar">
+    <span>✅ Имаш незапазени промени</span>
+    <button class="btn btn-green" onclick="downloadJSON()">⬇️ Свали shelters.json</button>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('dl-bar').style.display='none'">✕</button>
+  </div>
+
+  <div class="list" id="list"></div>
+</div>
+
+<!-- ── Форма ── -->
+<div class="overlay" id="form-ov" onclick="if(event.target===this)closeForm()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="form-title">Добави нов приют</h2>
+      <button class="close-btn" onclick="closeForm()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="fsec">
+        <div class="fsec-title">📋 Основна информация</div>
+        <div class="f">
+          <label>Пълно наименование *</label>
+          <input type="text" id="f-name" placeholder="Общински приют — Град"/>
+        </div>
+        <div class="row2">
+          <div class="f">
+            <label>Град *</label>
+            <input type="text" id="f-city" placeholder="София"/>
+          </div>
+          <div class="f">
+            <label>Адрес</label>
+            <input type="text" id="f-address" placeholder="ул. ..., 1000 ..."/>
+          </div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="fsec-title">📍 Местоположение на картата *</div>
+        <div class="row2">
+          <div class="f">
+            <label>Ширина (Lat) *</label>
+            <input type="text" id="f-lat" placeholder="42.6977"/>
+          </div>
+          <div class="f">
+            <label>Дължина (Lng) *</label>
+            <input type="text" id="f-lng" placeholder="23.3219"/>
+          </div>
+        </div>
+        <div class="f" style="margin-top:-4px;">
+          <span class="hint">📌 Отиди на <a href="https://maps.google.com" target="_blank">Google Maps</a> → десен клик на точното място → копирай двете числа</span>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="fsec-title">🗓️ Дни за разходки</div>
+        <div class="days" id="days-grid"></div>
+        <div class="f">
+          <label>Работно време / Часове за посещение</label>
+          <input type="text" id="f-walktime" placeholder="Пн–Пет 09:00–16:00 | Сб 10:00–14:00"/>
+        </div>
+        <div class="f">
+          <label>Допълнителна информация</label>
+          <textarea id="f-walkinfo" placeholder="Как да се запишат доброволците, какво да носят..."></textarea>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="fsec-title">📞 Контакти</div>
+        <div class="row2">
+          <div class="f">
+            <label>Телефон</label>
+            <input type="text" id="f-phone" placeholder="0888 123 456"/>
+          </div>
+          <div class="f">
+            <label>Допълнителни телефони</label>
+            <input type="text" id="f-phones" placeholder="0888111222, 0899333444"/>
+            <span class="hint">Разделени със запетая</span>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="f">
+            <label>Facebook</label>
+            <input type="url" id="f-facebook" placeholder="https://facebook.com/..."/>
+          </div>
+          <div class="f">
+            <label>Instagram</label>
+            <input type="url" id="f-instagram" placeholder="https://instagram.com/..."/>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="f">
+            <label>Уебсайт</label>
+            <input type="url" id="f-website" placeholder="https://..."/>
+          </div>
+          <div class="f">
+            <label>Дарение (линк)</label>
+            <input type="url" id="f-donate" placeholder="https://..."/>
+          </div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="fsec-title">🖼️ Снимки и нужди</div>
+
+        <!-- Upload зона -->
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('img-picker').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="event.preventDefault();this.classList.remove('drag');handleFiles(event.dataTransfer.files)">
+          <input type="file" id="img-picker" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)"/>
+          <div class="upload-icon">📸</div>
+          <div class="upload-text">Кликни или провлачи снимки тук</div>
+          <div class="upload-hint">Автоматично се преоразмеряват до 1200px и се оптимизират</div>
+        </div>
+
+        <!-- Преглед на качени снимки -->
+        <div id="img-previews"></div>
+
+        <div class="f">
+          <label>Пътища на снимките (попълват се автоматично)</label>
+          <textarea id="f-gallery" rows="3" placeholder="images/sofia.jpg&#10;images/sofia2.jpg"></textarea>
+          <span class="hint">Можеш и да пишеш ръчно — по един ред за снимка</span>
+        </div>
+        <div class="f">
+          <label>Нужди на приюта</label>
+          <input type="text" id="f-needs" placeholder="Храна, Одеяла, Играчки, Лекарства"/>
+          <span class="hint">Разделени със запетая</span>
+        </div>
+      </div>
+
+    </div><!-- /.modal-body -->
+    <div class="modal-ftr">
+      <button class="btn btn-outline" onclick="closeForm()">Откажи</button>
+      <button class="btn btn-orange" id="save-btn" onclick="saveShelter()">💾 Запази промените</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Изтриване ── -->
+<div class="del-ov" id="del-ov">
+  <div class="del-box">
+    <div class="di">🗑️</div>
+    <h3>Изтриване</h3>
+    <p id="del-txt"></p>
+    <div class="btns">
+      <button class="btn btn-outline" onclick="closeDelete()">Откажи</button>
+      <button class="btn btn-red" onclick="confirmDelete()">Да, изтрий</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const PASS = 'mecho1!';
+const DAYS = ['Понеделник','Вторник','Сряда','Четвъртък','Петък','Събота','Неделя'];
+let shelters = [];
+let editIdx = null;
+let deleteIdx = null;
+let hasChanges = false;
+
+// ── Влизане ──
+function doLogin() {
+  if (document.getElementById('pw').value === PASS) {
+    localStorage.setItem('admin_ok','1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadShelters();
+  } else {
+    const inp = document.getElementById('pw');
+    inp.classList.remove('shake');
+    void inp.offsetWidth;
+    inp.classList.add('shake');
+    inp.value = '';
+    document.getElementById('login-err').textContent = 'Грешна парола. Опитай отново.';
+    setTimeout(() => inp.classList.remove('shake'), 400);
+  }
+}
+
+function logout() {
+  localStorage.removeItem('admin_ok');
+  location.reload();
+}
+
+// ── Зареди данните ──
+async function loadShelters() {
+  try {
+    const r = await fetch('shelters.json?t=' + Date.now());
+    shelters = await r.json();
+    renderList();
+    toast('Заредени ' + shelters.length + ' приюта', 'info');
+  } catch(e) {
+    toast('Грешка при зареждане!', 'err');
+  }
+}
+
+// ── Списък ──
+function renderList() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  const items = shelters.map((s,i)=>({s,i})).filter(({s}) =>
+    !q || s.name.toLowerCase().includes(q) || s.city.toLowerCase().includes(q)
+  );
+  document.getElementById('count-pill').textContent = items.length + ' / ' + shelters.length + ' приюта';
+  if (!items.length) {
+    document.getElementById('list').innerHTML = '<div class="empty">Няма намерени приюти.</div>';
+    return;
+  }
+  document.getElementById('list').innerHTML = items.map(({s,i}) => `
+    <div class="sc">
+      <div class="sc-n">${i+1}</div>
+      <div class="sc-info">
+        <div class="sc-name">${s.name}</div>
+        <div class="sc-sub">📍 ${s.city}${s.phone ? ' · 📞 '+s.phone : ''}${s.walkDays&&s.walkDays.length ? ' · 🗓️ '+s.walkDays.join(', ') : ''}</div>
+      </div>
+      <div class="sc-btns">
+        <button class="btn btn-outline btn-sm" onclick="openForm(${i})">✏️ Редактирай</button>
+        <button class="btn btn-red btn-sm" onclick="askDelete(${i})">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── Форма ──
+function openForm(idx) {
+  editIdx = idx;
+  document.getElementById('form-title').textContent = idx === null ? '➕ Нов приют' : '✏️ Редактирай — ' + shelters[idx].name;
+
+  // Дни
+  const selDays = idx !== null ? (shelters[idx].walkDays || []) : [];
+  document.getElementById('days-grid').innerHTML = DAYS.map(d =>
+    `<button type="button" class="dc${selDays.includes(d)?' on':''}" onclick="this.classList.toggle('on')">${d}</button>`
+  ).join('');
+
+  if (idx !== null) {
+    const s = shelters[idx];
+    set('f-name',    s.name      || '');
+    set('f-city',    s.city      || '');
+    set('f-address', s.address   || '');
+    set('f-lat',     s.lat       != null ? String(s.lat) : '');
+    set('f-lng',     s.lng       != null ? String(s.lng) : '');
+    set('f-walktime',s.walkTime  || '');
+    set('f-walkinfo',s.walkInfo  || '');
+    set('f-phone',   s.phone     || '');
+    set('f-phones',  (s.phones   || []).join(', '));
+    set('f-facebook',s.facebook  || '');
+    set('f-instagram',s.instagram|| '');
+    set('f-website', s.website   || '');
+    // donate може да е обект (IBAN) или string (URL)
+    const don = s.donate;
+    set('f-donate', typeof don === 'string' ? don : (don && (don.other||don.paypal||'')) || '');
+    set('f-needs',   (s.needs    || []).join(', '));
+    set('f-gallery', (s.gallery  || []).join('\n'));
+  } else {
+    ['f-name','f-city','f-address','f-lat','f-lng','f-walktime','f-walkinfo',
+     'f-phone','f-phones','f-facebook','f-instagram','f-website','f-donate','f-needs','f-gallery']
+    .forEach(id => set(id, ''));
+  }
+
+  document.getElementById('form-ov').classList.add('open');
+  setTimeout(() => document.getElementById('f-name').focus(), 80);
+}
+
+function closeForm() {
+  document.getElementById('form-ov').classList.remove('open');
+}
+
+function set(id, val) { document.getElementById(id).value = val; }
+function get(id)      { return document.getElementById(id).value.trim(); }
+
+// ── Запазване ──
+function saveShelter() {
+  const name = get('f-name'), city = get('f-city');
+  const lat  = parseFloat(get('f-lat')),  lng = parseFloat(get('f-lng'));
+
+  if (!name) { toast('Въведи наименование!', 'err'); return; }
+  if (!city) { toast('Въведи града!', 'err'); return; }
+  if (isNaN(lat) || isNaN(lng)) { toast('Въведи правилни координати (lat / lng)!', 'err'); return; }
+
+  const phones = get('f-phones') ? get('f-phones').split(',').map(p=>p.trim()).filter(Boolean) : [];
+  const needs  = get('f-needs')  ? get('f-needs').split(',').map(n=>n.trim()).filter(Boolean)  : [];
+  const gallery= get('f-gallery')? get('f-gallery').split('\n').map(g=>g.trim()).filter(Boolean): [];
+  const days   = [...document.querySelectorAll('#days-grid .dc.on')].map(c=>c.textContent);
+
+  // Ако приютът е имал IBAN donate обект — запазваме го непроменен, освен ако не сме въвели URL
+  let donate = get('f-donate') || undefined;
+  if (editIdx !== null && !donate && shelters[editIdx].donate && typeof shelters[editIdx].donate === 'object') {
+    donate = shelters[editIdx].donate; // запази оригиналния обект
+  }
+
+  const shelter = { name, city };
+  if (get('f-address'))   shelter.address  = get('f-address');
+  shelter.lat = lat;
+  shelter.lng = lng;
+  shelter.walkDays = days;
+  shelter.walkTime = get('f-walktime') || '';
+  shelter.walkInfo = get('f-walkinfo') || '';
+  shelter.needs    = needs;
+  shelter.gallery  = gallery;
+  if (get('f-phone'))     shelter.phone     = get('f-phone');
+  if (phones.length)      shelter.phones    = phones;
+  if (get('f-facebook'))  shelter.facebook  = get('f-facebook');
+  if (get('f-instagram')) shelter.instagram = get('f-instagram');
+  if (get('f-website'))   shelter.website   = get('f-website');
+  if (donate)             shelter.donate    = donate;
+
+  if (editIdx === null) {
+    shelters.push(shelter);
+    toast('✅ Добавен: ' + name, 'ok');
+  } else {
+    shelters[editIdx] = shelter;
+    toast('✅ Запазен: ' + name, 'ok');
+  }
+
+  markChanged();
+  closeForm();
+  renderList();
+}
+
+// ── Изтриване ──
+function askDelete(idx) {
+  deleteIdx = idx;
+  document.getElementById('del-txt').textContent = shelters[idx].name + ' — ' + shelters[idx].city;
+  document.getElementById('del-ov').classList.add('open');
+}
+
+function closeDelete() {
+  document.getElementById('del-ov').classList.remove('open');
+}
+
+function confirmDelete() {
+  const name = shelters[deleteIdx].name;
+  shelters.splice(deleteIdx, 1);
+  closeDelete();
+  markChanged();
+  renderList();
+  toast('🗑️ Изтрит: ' + name, 'ok');
+}
+
+// ── Изтегляне ──
+function markChanged() {
+  hasChanges = true;
+  document.getElementById('dl-bar').style.display = 'flex';
+}
+
+function downloadJSON() {
+  const blob = new Blob([JSON.stringify(shelters, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'shelters.json';
+  a.click();
+  toast('⬇️ Файлът се сваля!', 'ok');
+}
+
+// ── Toast ──
+let _tt;
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(_tt);
+  _tt = setTimeout(() => el.className = '', 3200);
+}
+
+// ── Предупреждение при затваряне ──
+window.addEventListener('beforeunload', e => {
+  if (hasChanges) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// ── Качване на снимки ──
+const uploadedImgs = []; // { name, url, blob }
+
+function handleFiles(files) {
+  const arr = [...files].filter(f => f.type.startsWith('image/'));
+  if (!arr.length) return;
+  arr.forEach(file => resizeAndPreview(file));
+}
+
+function resizeAndPreview(file) {
+  const MAX = 1200, QUALITY = 0.82;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      // Resize via canvas
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      else if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+      // Sanitise filename → images/cityname.jpg
+      const base = file.name.replace(/\.[^.]+$/, '')
+        .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-_]/g, '');
+      const fname = 'images/' + base + '.jpg';
+
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const idx = uploadedImgs.length;
+        uploadedImgs.push({ name: fname, url, blob, original: file.name });
+        addPreview(idx, url, fname, blob);
+        addToGallery(fname);
+        toast('📸 ' + file.name + ' → готово (' + w + '×' + h + 'px)', 'ok');
+      }, 'image/jpeg', QUALITY);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function addPreview(idx, url, fname, blob) {
+  const div = document.createElement('div');
+  div.className = 'img-thumb';
+  div.id = 'thumb-' + idx;
+  div.innerHTML = `
+    <img src="${url}" alt=""/>
+    <button class="rm" onclick="removeImg(${idx})" title="Премахни">✕</button>
+    <button class="dl" onclick="downloadImg(${idx})">⬇ Свали</button>`;
+  document.getElementById('img-previews').appendChild(div);
+}
+
+function removeImg(idx) {
+  const entry = uploadedImgs[idx];
+  if (!entry) return;
+  // Remove from gallery textarea
+  const ta = document.getElementById('f-gallery');
+  ta.value = ta.value.split('\n').filter(l => l.trim() !== entry.name).join('\n');
+  // Remove preview
+  const el = document.getElementById('thumb-' + idx);
+  if (el) el.remove();
+  uploadedImgs[idx] = null;
+}
+
+function downloadImg(idx) {
+  const entry = uploadedImgs[idx];
+  if (!entry) return;
+  const a = document.createElement('a');
+  a.href = entry.url;
+  a.download = entry.original.replace(/\.[^.]+$/, '') + '.jpg';
+  a.click();
+}
+
+function addToGallery(fname) {
+  const ta = document.getElementById('f-gallery');
+  const lines = ta.value.split('\n').filter(l => l.trim());
+  if (!lines.includes(fname)) {
+    lines.push(fname);
+    ta.value = lines.join('\n');
+  }
+}
+
+function clearPreviews() {
+  uploadedImgs.length = 0;
+  document.getElementById('img-previews').innerHTML = '';
+}
+
+// Clear previews when form opens
+const _origOpenForm = openForm;
+openForm = function(idx) {
+  clearPreviews();
+  _origOpenForm(idx);
+};
+
+// ── Авто-влизане ──
+window.addEventListener('load', () => {
+  if (localStorage.getItem('admin_ok') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadShelters();
+  }
+});
+</script>
+</body>
+</html>
