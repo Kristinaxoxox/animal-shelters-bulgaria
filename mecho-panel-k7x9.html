@@ -429,7 +429,7 @@ function renderList() {
   // Sort alphabetically, then filter by search
   const sorted = shelters
     .map((s,i) => ({s, i}))
-    .sort((a,b) => a.s.name.localeCompare(b.s.name, 'bg'));
+    .sort((a,b) => a.s.name.localeCompare(b.s.name));
 
   const items = sorted.filter(({s}) =>
     !q || s.name.toLowerCase().includes(q) || s.city.toLowerCase().includes(q)
@@ -581,7 +581,7 @@ function saveShelter() {
     toast('✅ Запазен: ' + name, 'ok');
   }
 
-  shelters.sort((a,b) => a.name.localeCompare(b.name, 'bg'));
+  shelters.sort((a,b) => a.name.localeCompare(b.name));
   markChanged();
   closeForm();
   renderList();

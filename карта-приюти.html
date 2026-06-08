@@ -1683,7 +1683,7 @@ document.getElementById('lightbox').addEventListener('touchend', e => {
 
 // ── Load shelters from JSON and initialise ──
 fetch('shelters.json').then(r => r.json()).then(data => {
-  shelters = data.sort((a,b) => a.name.localeCompare(b.name, 'bg'));
+  shelters = data.sort((a,b) => a.name.localeCompare(b.name));
   shelters.forEach(s => {
     const marker = L.marker([s.lat, s.lng], { icon: makeIcon() })
       .bindPopup(buildPopup(s), { maxWidth: 280 });

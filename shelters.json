@@ -1,5 +1,119 @@
 [
   {
+    "name": "Animal Help Mezdra",
+    "city": "Мездра",
+    "address": "гр. Мездра",
+    "lat": 43.1422,
+    "lng": 23.7219,
+    "walkDays": [
+      "Събота",
+      "Неделя"
+    ],
+    "walkTime": "С предварителна уговорка",
+    "walkInfo": "Пишете им директно във Facebook страницата за уговаряне на разходка. Доброволците се включват основно в игра с кучетата — всички животни се пускат всеки ден да тичат свободно в двора.",
+    "needs": [
+      "Средства за покриване на сметки в клиниката",
+      "Консерви с храна за по-възрастни и болни кучета"
+    ],
+    "gallery": [
+      "images/mezdra1.jpg",
+      "images/mezdra2.jpg",
+      "images/mezdra4.jpg",
+      "images/mezdra3.jpg",
+      "images/mezdra5.jpg",
+      "images/mezdra6.jpg"
+    ],
+    "facebook": "https://www.facebook.com/AnimalHelpMezdra",
+    "website": "https://animalhelpmezdra.com",
+    "donate": "https://animalhelpmezdra.com/donate"
+  },
+  {
+    "name": "Animal Hope Varna",
+    "city": "Варна",
+    "address": "гр. Варна",
+    "lat": 43.2141,
+    "lng": 27.9147,
+    "walkDays": [
+      "Понеделник",
+      "Вторник",
+      "Сряда",
+      "Четвъртък",
+      "Петък",
+      "Събота"
+    ],
+    "walkTime": "Пн–Пет 10:00–20:00 | Събота 12:00–19:00 | Неделя — затворено",
+    "walkInfo": "Фондация Animal Hope Varna работи за защита и намиране на домове за бездомни животни във Варна. За повече информация посетете сайта им или се свържете директно.",
+    "needs": [],
+    "gallery": [
+      "images/animalhopevarna.jpg"
+    ],
+    "phone": "",
+    "facebook": "https://www.facebook.com/animal.hope.varna/",
+    "website": "https://animalhope-varna.org/",
+    "donate": null
+  },
+  {
+    "name": "PAW – Pazardjik Animal Welfare",
+    "city": "Пазарджик",
+    "address": "с. Мало Конаре, обл. Пазарджик",
+    "lat": 42.1766,
+    "lng": 24.4674,
+    "walkDays": [
+      "Събота",
+      "Неделя"
+    ],
+    "walkTime": "С уговорка",
+    "walkInfo": "С удоволствие приемаме доброволци! Кучетата тичат свободно в дворовете и по полето. Фармата съществува от 2017 г. и се грижи за около 60 кучета.",
+    "needs": [
+      "Доброволци — само двама човека се грижат за всичко",
+      "Ремонт на покрива (изгнил и се рони)",
+      "Нова електрическа инсталация"
+    ],
+    "gallery": [
+      "images/pawpazardjik-1.jpg",
+      "images/pawpazardjik-2.jpg",
+      "images/pawpazardjik-3.jpg"
+    ],
+    "phone": "",
+    "facebook": "https://www.facebook.com/people/PAW-Pazardjik-Animal-Welfare/100064815574079/",
+    "website": "",
+    "donate": {
+      "iban": "BG48UBBS88881000988899",
+      "bic": "UBBSBGSF",
+      "bank": "Обединена Българска Банка (ОББ)",
+      "recipient": "Сдружение ПАУ Пазарджик",
+      "note": "Дарение",
+      "paypal": "",
+      "revolut": "",
+      "other": ""
+    }
+  },
+  {
+    "name": "Sanctuary — Приют за безстопанствени животни",
+    "city": "Разград",
+    "address": "ул. Костур №30, гр. Разград 7200",
+    "lat": 43.5254,
+    "lng": 26.5247,
+    "walkDays": [
+      "Понеделник",
+      "Вторник",
+      "Сряда",
+      "Четвъртък",
+      "Петък",
+      "Събота"
+    ],
+    "walkTime": "Пн–Пет 09:00–12:00 и 13:00–16:00 | Събота 09:00–12:00",
+    "walkInfo": "Приютът е отворен в работно време. За въпроси: shelter@sanctuary.bg или на посочения телефон.",
+    "needs": [],
+    "gallery": [
+      "images/razgrad.jpg"
+    ],
+    "phone": "084248868",
+    "facebook": "",
+    "website": "https://sanctuary.bg",
+    "donate": null
+  },
+  {
     "name": "Живот без риск за бездомните животни",
     "city": "Свищов",
     "address": "Западна Индустриална зона, до товарния портал на Свилоза АД, гр. Свищов",
@@ -743,119 +857,5 @@
       "donatePageUrl": "https://streetheartsbg.com/how-you-can-help-dogs-in-bulgaria/donations-to-help-street-dogs-in-bulgaria.html",
       "shop": "https://streetheartsbg.com/buy-the-official-street-hearts-book.html"
     }
-  },
-  {
-    "name": "Animal Help Mezdra",
-    "city": "Мездра",
-    "address": "гр. Мездра",
-    "lat": 43.1422,
-    "lng": 23.7219,
-    "walkDays": [
-      "Събота",
-      "Неделя"
-    ],
-    "walkTime": "С предварителна уговорка",
-    "walkInfo": "Пишете им директно във Facebook страницата за уговаряне на разходка. Доброволците се включват основно в игра с кучетата — всички животни се пускат всеки ден да тичат свободно в двора.",
-    "needs": [
-      "Средства за покриване на сметки в клиниката",
-      "Консерви с храна за по-възрастни и болни кучета"
-    ],
-    "gallery": [
-      "images/mezdra1.jpg",
-      "images/mezdra2.jpg",
-      "images/mezdra4.jpg",
-      "images/mezdra3.jpg",
-      "images/mezdra5.jpg",
-      "images/mezdra6.jpg"
-    ],
-    "facebook": "https://www.facebook.com/AnimalHelpMezdra",
-    "website": "https://animalhelpmezdra.com",
-    "donate": "https://animalhelpmezdra.com/donate"
-  },
-  {
-    "name": "Animal Hope Varna",
-    "city": "Варна",
-    "address": "гр. Варна",
-    "lat": 43.2141,
-    "lng": 27.9147,
-    "walkDays": [
-      "Понеделник",
-      "Вторник",
-      "Сряда",
-      "Четвъртък",
-      "Петък",
-      "Събота"
-    ],
-    "walkTime": "Пн–Пет 10:00–20:00 | Събота 12:00–19:00 | Неделя — затворено",
-    "walkInfo": "Фондация Animal Hope Varna работи за защита и намиране на домове за бездомни животни във Варна. За повече информация посетете сайта им или се свържете директно.",
-    "needs": [],
-    "gallery": [
-      "images/animalhopevarna.jpg"
-    ],
-    "phone": "",
-    "facebook": "https://www.facebook.com/animal.hope.varna/",
-    "website": "https://animalhope-varna.org/",
-    "donate": null
-  },
-  {
-    "name": "PAW – Pazardjik Animal Welfare",
-    "city": "Пазарджик",
-    "address": "с. Мало Конаре, обл. Пазарджик",
-    "lat": 42.1766,
-    "lng": 24.4674,
-    "walkDays": [
-      "Събота",
-      "Неделя"
-    ],
-    "walkTime": "С уговорка",
-    "walkInfo": "С удоволствие приемаме доброволци! Кучетата тичат свободно в дворовете и по полето. Фармата съществува от 2017 г. и се грижи за около 60 кучета.",
-    "needs": [
-      "Доброволци — само двама човека се грижат за всичко",
-      "Ремонт на покрива (изгнил и се рони)",
-      "Нова електрическа инсталация"
-    ],
-    "gallery": [
-      "images/pawpazardjik-1.jpg",
-      "images/pawpazardjik-2.jpg",
-      "images/pawpazardjik-3.jpg"
-    ],
-    "phone": "",
-    "facebook": "https://www.facebook.com/people/PAW-Pazardjik-Animal-Welfare/100064815574079/",
-    "website": "",
-    "donate": {
-      "iban": "BG48UBBS88881000988899",
-      "bic": "UBBSBGSF",
-      "bank": "Обединена Българска Банка (ОББ)",
-      "recipient": "Сдружение ПАУ Пазарджик",
-      "note": "Дарение",
-      "paypal": "",
-      "revolut": "",
-      "other": ""
-    }
-  },
-  {
-    "name": "Sanctuary — Приют за безстопанствени животни",
-    "city": "Разград",
-    "address": "ул. Костур №30, гр. Разград 7200",
-    "lat": 43.5254,
-    "lng": 26.5247,
-    "walkDays": [
-      "Понеделник",
-      "Вторник",
-      "Сряда",
-      "Четвъртък",
-      "Петък",
-      "Събота"
-    ],
-    "walkTime": "Пн–Пет 09:00–12:00 и 13:00–16:00 | Събота 09:00–12:00",
-    "walkInfo": "Приютът е отворен в работно време. За въпроси: shelter@sanctuary.bg или на посочения телефон.",
-    "needs": [],
-    "gallery": [
-      "images/razgrad.jpg"
-    ],
-    "phone": "084248868",
-    "facebook": "",
-    "website": "https://sanctuary.bg",
-    "donate": null
   }
 ]
