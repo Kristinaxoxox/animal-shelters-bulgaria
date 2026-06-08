@@ -192,9 +192,27 @@
   </div>
 
   <div id="dl-bar">
-    <span>✅ Имаш незапазени промени</span>
-    <button class="btn btn-green" onclick="downloadJSON()">⬇️ Свали shelters.json</button>
-    <button class="btn btn-outline btn-sm" onclick="document.getElementById('dl-bar').style.display='none'">✕</button>
+    <span id="dl-bar-msg">✅ Имаш незапазени промени</span>
+    <button class="btn btn-green" id="dl-publish-btn" onclick="publishChanges()">🚀 Публикувай промените</button>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('dl-bar').style.display='none'" title="Скрий">✕</button>
+  </div>
+
+  <!-- GitHub токен настройки -->
+  <div id="gh-setup" style="display:none;background:#fff8f0;border-bottom:2px solid var(--border);padding:14px 20px;">
+    <div style="font-size:0.88rem;font-weight:700;margin-bottom:10px;">🔑 Свържи с GitHub за автоматично публикуване</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="f" style="flex:1;min-width:200px;margin:0;">
+        <label>GitHub токен (repo scope)</label>
+        <input type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxx"/>
+        <span class="hint">github.com → Settings → Developer settings → Personal access tokens → Classic → scope: <strong>repo</strong></span>
+      </div>
+      <div class="f" style="min-width:200px;margin:0;">
+        <label>GitHub repo</label>
+        <input type="text" id="gh-repo-input" value="Kristinaxoxox/animal-shelters-bulgaria"/>
+      </div>
+      <button class="btn btn-orange" onclick="saveGhSettings()">Свържи →</button>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('gh-setup').style.display='none'">Откажи</button>
+    </div>
   </div>
 
   <div class="list" id="list"></div>
@@ -524,19 +542,98 @@ function confirmDelete() {
   toast('🗑️ Изтрит: ' + name, 'ok');
 }
 
-// ── Изтегляне ──
-function markChanged() {
-  hasChanges = true;
-  document.getElementById('dl-bar').style.display = 'flex';
+// ── GitHub настройки ──
+let ghToken = localStorage.getItem('gh_token') || '';
+let ghRepo  = localStorage.getItem('gh_repo')  || 'Kristinaxoxox/animal-shelters-bulgaria';
+let ghFileSha = '';
+
+function saveGhSettings() {
+  const t = document.getElementById('gh-token-input').value.trim();
+  const r = document.getElementById('gh-repo-input').value.trim();
+  if (!t || !r) return toast('Въведи токен и repo!', 'err');
+  ghToken = t; ghRepo = r;
+  localStorage.setItem('gh_token', t);
+  localStorage.setItem('gh_repo', r);
+  document.getElementById('gh-setup').style.display = 'none';
+  toast('✅ GitHub свързан!', 'ok');
+  publishChanges();
 }
 
-function downloadJSON() {
-  const blob = new Blob([JSON.stringify(shelters, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'shelters.json';
-  a.click();
-  toast('⬇️ Файлът се сваля!', 'ok');
+function isGhConnected() { return !!ghToken; }
+
+// ── Публикуване ──
+function markChanged() {
+  hasChanges = true;
+  const bar = document.getElementById('dl-bar');
+  bar.style.display = 'flex';
+  const btn = document.getElementById('dl-publish-btn');
+  if (isGhConnected()) {
+    btn.textContent = '🚀 Публикувай промените';
+    document.getElementById('dl-bar-msg').textContent = '✅ Имаш незапазени промени';
+  } else {
+    btn.textContent = '🔑 Свържи с GitHub и публикувай';
+    document.getElementById('dl-bar-msg').textContent = '✅ Имаш незапазени промени';
+  }
+}
+
+async function publishChanges() {
+  if (!isGhConnected()) {
+    // Show GitHub setup panel
+    document.getElementById('gh-token-input').value = ghToken;
+    document.getElementById('gh-repo-input').value = ghRepo;
+    document.getElementById('gh-setup').style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('dl-publish-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Публикуване...';
+  try {
+    // Get current file SHA if we don't have it
+    if (!ghFileSha) {
+      const r = await fetch(`https://api.github.com/repos/${ghRepo}/contents/shelters.json`, {
+        headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github.v3+json' }
+      });
+      if (r.ok) { const d = await r.json(); ghFileSha = d.sha; }
+    }
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(shelters, null, 2))));
+    const body = { message: 'Admin: обновени данни за приюти', content, sha: ghFileSha || undefined };
+    if (!ghFileSha) delete body.sha;
+    const res = await fetch(`https://api.github.com/repos/${ghRepo}/contents/shelters.json`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `token ${ghToken}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || res.status);
+    }
+    const data = await res.json();
+    ghFileSha = data.content.sha;
+    hasChanges = false;
+    document.getElementById('dl-bar').style.display = 'none';
+    toast('🚀 Публикувано! Картата ще се обнови след ~1 мин.', 'ok');
+  } catch(e) {
+    toast('Грешка: ' + e.message, 'err');
+    btn.textContent = '🚀 Публикувай промените';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isGhConnected() ? '🚀 Публикувай промените' : '🔑 Свържи с GitHub и публикувай';
+  }
+}
+
+// Зареждане на SHA при стартиране (ако има токен)
+async function loadFileSha() {
+  if (!ghToken) return;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${ghRepo}/contents/shelters.json`, {
+      headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (r.ok) { const d = await r.json(); ghFileSha = d.sha; }
+  } catch(_) {}
 }
 
 // ── Toast ──
@@ -690,6 +787,7 @@ window.addEventListener('load', () => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     loadShelters();
+    loadFileSha();
   }
 });
 </script>
