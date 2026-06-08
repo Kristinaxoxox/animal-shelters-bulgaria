@@ -135,6 +135,25 @@
     .img-thumb .dl{position:absolute;bottom:3px;left:3px;right:3px;background:var(--orange);color:#fff;border:none;border-radius:4px;font-size:0.6rem;font-weight:700;cursor:pointer;padding:2px 4px;font-family:inherit;}
     .img-thumb .dl:hover{background:#b85c14;}
     .img-processing{font-size:0.78rem;color:var(--dim);padding:8px 0;}
+
+    /* ── Галерия ── */
+    .gallery-label{font-size:0.72rem;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+    .gallery-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+    .gitem{position:relative;width:100px;height:100px;border-radius:10px;overflow:hidden;border:2px solid var(--border);cursor:grab;flex-shrink:0;transition:transform 0.15s,box-shadow 0.15s;}
+    .gitem:hover{box-shadow:0 4px 16px rgba(205,106,24,0.2);}
+    .gitem.first{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange);}
+    .gitem.drag-over{transform:scale(1.06);border-color:var(--orange);border-style:dashed;}
+    .gitem img{width:100%;height:100%;object-fit:cover;pointer-events:none;}
+    .gitem-badge{position:absolute;top:4px;left:4px;background:var(--orange);color:#fff;font-size:0.68rem;font-weight:800;padding:2px 6px;border-radius:10px;line-height:1.4;}
+    .gitem.first .gitem-badge{background:#d4a017;font-size:0.8rem;}
+    .gitem-actions{position:absolute;bottom:0;left:0;right:0;display:flex;gap:2px;padding:3px;background:rgba(0,0,0,0.55);opacity:0;transition:opacity 0.15s;}
+    .gitem:hover .gitem-actions{opacity:1;}
+    .gitem-btn{flex:1;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:0.7rem;padding:3px 0;cursor:pointer;border-radius:4px;font-family:inherit;}
+    .gitem-btn:hover{background:rgba(255,255,255,0.35);}
+    .gitem-btn.rm-btn:hover{background:var(--red);}
+    .gitem-btn:disabled{opacity:0.25;cursor:default;}
+    .gitem-dl{position:absolute;top:4px;right:4px;background:var(--green);border:none;color:#fff;font-size:0.58rem;font-weight:700;padding:2px 5px;border-radius:6px;cursor:pointer;font-family:inherit;}
+    .gitem-dl:hover{opacity:0.85;}
   </style>
 </head>
 <body>
@@ -276,6 +295,9 @@
       <div class="fsec">
         <div class="fsec-title">🖼️ Снимки и нужди</div>
 
+        <!-- Галерия: преглед + наредба -->
+        <div id="gallery-list"></div>
+
         <!-- Upload зона -->
         <div class="upload-zone" id="upload-zone" onclick="document.getElementById('img-picker').click()"
              ondragover="event.preventDefault();this.classList.add('drag')"
@@ -283,18 +305,11 @@
              ondrop="event.preventDefault();this.classList.remove('drag');handleFiles(event.dataTransfer.files)">
           <input type="file" id="img-picker" accept="image/*" multiple style="display:none" onchange="handleFiles(this.files)"/>
           <div class="upload-icon">📸</div>
-          <div class="upload-text">Кликни или провлачи снимки тук</div>
-          <div class="upload-hint">Автоматично се преоразмеряват до 1200px и се оптимизират</div>
+          <div class="upload-text">Кликни или провлачи за да добавиш снимки</div>
+          <div class="upload-hint">Преоразмеряват се автоматично до 1200px</div>
         </div>
 
-        <!-- Преглед на качени снимки -->
-        <div id="img-previews"></div>
-
-        <div class="f">
-          <label>Пътища на снимките (попълват се автоматично)</label>
-          <textarea id="f-gallery" rows="3" placeholder="images/sofia.jpg&#10;images/sofia2.jpg"></textarea>
-          <span class="hint">Можеш и да пишеш ръчно — по един ред за снимка</span>
-        </div>
+        <input type="hidden" id="f-gallery"/>
         <div class="f">
           <label>Нужди на приюта</label>
           <input type="text" id="f-needs" placeholder="Храна, Одеяла, Играчки, Лекарства"/>
@@ -451,7 +466,7 @@ function saveShelter() {
 
   const phones = get('f-phones') ? get('f-phones').split(',').map(p=>p.trim()).filter(Boolean) : [];
   const needs  = get('f-needs')  ? get('f-needs').split(',').map(n=>n.trim()).filter(Boolean)  : [];
-  const gallery= get('f-gallery')? get('f-gallery').split('\n').map(g=>g.trim()).filter(Boolean): [];
+  const gallery = galleryItems.map(i => i.path).filter(Boolean);
   const days   = [...document.querySelectorAll('#days-grid .dc.on')].map(c=>c.textContent);
 
   // Ако приютът е имал IBAN donate обект — запазваме го непроменен, освен ако не сме въвели URL
@@ -539,42 +554,116 @@ window.addEventListener('beforeunload', e => {
   if (hasChanges) { e.preventDefault(); e.returnValue = ''; }
 });
 
-// ── Качване на снимки ──
-const uploadedImgs = []; // { name, url, blob }
+// ── Галерия: качване + наредба ──
+// galleryItems = [{ path, url, isNew, originalName }]
+let galleryItems = [];
+let dragSrcIdx = null;
 
-function handleFiles(files) {
-  const arr = [...files].filter(f => f.type.startsWith('image/'));
-  if (!arr.length) return;
-  arr.forEach(file => resizeAndPreview(file));
+function initGallery(existingPaths) {
+  galleryItems = existingPaths.map(p => ({ path: p, url: p, isNew: false }));
+  renderGallery();
 }
 
-function resizeAndPreview(file) {
+function renderGallery() {
+  const wrap = document.getElementById('gallery-list');
+  if (!galleryItems.length) { wrap.innerHTML = ''; syncGallery(); return; }
+
+  wrap.innerHTML = `
+    <div class="gallery-label">Снимки — провлачи за да наредиш, ★ маркира корицата</div>
+    <div class="gallery-grid" id="gallery-grid">
+      ${galleryItems.map((item, i) => `
+        <div class="gitem${i===0?' first':''}" draggable="true" data-idx="${i}"
+             ondragstart="dragStart(event,${i})"
+             ondragover="event.preventDefault();event.currentTarget.classList.add('drag-over')"
+             ondragleave="event.currentTarget.classList.remove('drag-over')"
+             ondrop="dragDrop(event,${i})">
+          <div class="gitem-badge">${i===0?'★':i+1}</div>
+          <img src="${item.url}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2290%22 height=%2290%22><rect fill=%22%23f5d4ae%22 width=%2290%22 height=%2290%22/><text x=%2245%22 y=%2252%22 text-anchor=%22middle%22 font-size=%2224%22>🖼️</text></svg>'"/>
+          <div class="gitem-actions">
+            <button class="gitem-btn" onclick="moveImg(${i},-1)" title="Премести наляво" ${i===0?'disabled':''}>←</button>
+            <button class="gitem-btn rm-btn" onclick="removeGalleryItem(${i})" title="Изтрий">✕</button>
+            <button class="gitem-btn" onclick="moveImg(${i},1)" title="Премести надясно" ${i===galleryItems.length-1?'disabled':''}>→</button>
+          </div>
+          ${item.isNew ? `<button class="gitem-dl" onclick="downloadGalleryItem(${i})" title="Свали оптимизирания файл">⬇ Свали</button>` : ''}
+        </div>`).join('')}
+    </div>`;
+  syncGallery();
+}
+
+function syncGallery() {
+  document.getElementById('f-gallery').value = galleryItems.map(i => i.path).join('\n');
+}
+
+// Drag & drop reorder
+function dragStart(e, idx) {
+  dragSrcIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.style.opacity = '0.4';
+}
+function dragDrop(e, idx) {
+  e.currentTarget.classList.remove('drag-over');
+  e.currentTarget.style.opacity = '';
+  if (dragSrcIdx === null || dragSrcIdx === idx) return;
+  const moved = galleryItems.splice(dragSrcIdx, 1)[0];
+  galleryItems.splice(idx, 0, moved);
+  dragSrcIdx = null;
+  renderGallery();
+}
+document.addEventListener('dragend', () => {
+  dragSrcIdx = null;
+  document.querySelectorAll('.gitem').forEach(el => {
+    el.style.opacity = '';
+    el.classList.remove('drag-over');
+  });
+});
+
+// Move with arrows
+function moveImg(idx, dir) {
+  const to = idx + dir;
+  if (to < 0 || to >= galleryItems.length) return;
+  [galleryItems[idx], galleryItems[to]] = [galleryItems[to], galleryItems[idx]];
+  renderGallery();
+}
+
+function removeGalleryItem(idx) {
+  galleryItems.splice(idx, 1);
+  renderGallery();
+}
+
+function downloadGalleryItem(idx) {
+  const item = galleryItems[idx];
+  if (!item || !item.isNew || !item.blob) return;
+  const a = document.createElement('a');
+  a.href = item.url;
+  a.download = item.originalName || 'image.jpg';
+  a.click();
+}
+
+// Upload + resize
+function handleFiles(files) {
+  [...files].filter(f => f.type.startsWith('image/')).forEach(resizeAndAdd);
+}
+
+function resizeAndAdd(file) {
   const MAX = 1200, QUALITY = 0.82;
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
     img.onload = () => {
-      // Resize via canvas
       let w = img.width, h = img.height;
       if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
       else if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
-
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-
-      // Sanitise filename → images/cityname.jpg
       const base = file.name.replace(/\.[^.]+$/, '')
         .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-_]/g, '');
-      const fname = 'images/' + base + '.jpg';
-
+      const path = 'images/' + base + '.jpg';
       canvas.toBlob(blob => {
         const url = URL.createObjectURL(blob);
-        const idx = uploadedImgs.length;
-        uploadedImgs.push({ name: fname, url, blob, original: file.name });
-        addPreview(idx, url, fname, blob);
-        addToGallery(fname);
-        toast('📸 ' + file.name + ' → готово (' + w + '×' + h + 'px)', 'ok');
+        galleryItems.push({ path, url, isNew: true, blob, originalName: base + '.jpg' });
+        renderGallery();
+        toast('📸 ' + file.name + ' добавена (' + w + '×' + h + 'px)', 'ok');
       }, 'image/jpeg', QUALITY);
     };
     img.src = e.target.result;
@@ -582,57 +671,17 @@ function resizeAndPreview(file) {
   reader.readAsDataURL(file);
 }
 
-function addPreview(idx, url, fname, blob) {
-  const div = document.createElement('div');
-  div.className = 'img-thumb';
-  div.id = 'thumb-' + idx;
-  div.innerHTML = `
-    <img src="${url}" alt=""/>
-    <button class="rm" onclick="removeImg(${idx})" title="Премахни">✕</button>
-    <button class="dl" onclick="downloadImg(${idx})">⬇ Свали</button>`;
-  document.getElementById('img-previews').appendChild(div);
-}
-
-function removeImg(idx) {
-  const entry = uploadedImgs[idx];
-  if (!entry) return;
-  // Remove from gallery textarea
-  const ta = document.getElementById('f-gallery');
-  ta.value = ta.value.split('\n').filter(l => l.trim() !== entry.name).join('\n');
-  // Remove preview
-  const el = document.getElementById('thumb-' + idx);
-  if (el) el.remove();
-  uploadedImgs[idx] = null;
-}
-
-function downloadImg(idx) {
-  const entry = uploadedImgs[idx];
-  if (!entry) return;
-  const a = document.createElement('a');
-  a.href = entry.url;
-  a.download = entry.original.replace(/\.[^.]+$/, '') + '.jpg';
-  a.click();
-}
-
-function addToGallery(fname) {
-  const ta = document.getElementById('f-gallery');
-  const lines = ta.value.split('\n').filter(l => l.trim());
-  if (!lines.includes(fname)) {
-    lines.push(fname);
-    ta.value = lines.join('\n');
-  }
-}
-
-function clearPreviews() {
-  uploadedImgs.length = 0;
-  document.getElementById('img-previews').innerHTML = '';
-}
-
-// Clear previews when form opens
+// Override openForm to load existing gallery
 const _origOpenForm = openForm;
 openForm = function(idx) {
-  clearPreviews();
+  galleryItems = [];
   _origOpenForm(idx);
+  // Load existing gallery after fields are set
+  if (idx !== null && shelters[idx].gallery) {
+    initGallery(shelters[idx].gallery);
+  } else {
+    renderGallery();
+  }
 };
 
 // ── Авто-влизане ──
