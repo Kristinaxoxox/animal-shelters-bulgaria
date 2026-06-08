@@ -56,8 +56,14 @@
     .pill{background:var(--orange);color:#fff;padding:4px 12px;border-radius:20px;font-size:0.76rem;font-weight:700;white-space:nowrap;}
 
     /* ── Лента за сваляне ── */
-    #dl-bar{background:#e8f5e9;border-bottom:2px solid #a5d6a7;padding:11px 20px;display:none;align-items:center;gap:12px;flex-wrap:wrap;}
-    #dl-bar span{font-size:0.86rem;color:var(--green);font-weight:700;}
+    #dl-bar{background:#fff3cd;border-bottom:3px solid #f0c040;padding:14px 20px;display:none;align-items:center;gap:14px;flex-wrap:wrap;}
+    #dl-bar .dl-icon{font-size:1.6rem;flex-shrink:0;}
+    #dl-bar .dl-texts{flex:1;}
+    #dl-bar .dl-title{font-size:0.98rem;font-weight:800;color:#7a5c00;}
+    #dl-bar .dl-sub{font-size:0.78rem;color:#a07820;margin-top:1px;}
+    #dl-bar .btn-save-big{background:var(--green);color:#fff;padding:13px 28px;font-size:1rem;border-radius:10px;border:none;font-family:inherit;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background 0.2s;white-space:nowrap;}
+    #dl-bar .btn-save-big:hover{background:#2d8a4e;}
+    #dl-bar .btn-save-big:disabled{opacity:0.5;cursor:not-allowed;}
 
     /* ── Списък ── */
     .list{padding:16px 20px;max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:8px;}
@@ -192,25 +198,30 @@
   </div>
 
   <div id="dl-bar">
-    <span id="dl-bar-msg">✅ Имаш незапазени промени</span>
-    <button class="btn btn-green" id="dl-publish-btn" onclick="publishChanges()">🚀 Публикувай промените</button>
-    <button class="btn btn-outline btn-sm" onclick="document.getElementById('dl-bar').style.display='none'" title="Скрий">✕</button>
+    <div class="dl-icon">⚠️</div>
+    <div class="dl-texts">
+      <div class="dl-title" id="dl-bar-msg">Имаш незапазени промени!</div>
+      <div class="dl-sub">Натисни бутона, за да запазиш всичко на сайта.</div>
+    </div>
+    <button class="btn-save-big" id="dl-publish-btn" onclick="publishChanges()">💾 Запази всичко на сайта</button>
+    <button style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#999;padding:4px 8px;" onclick="document.getElementById('dl-bar').style.display='none'" title="Скрий">✕</button>
   </div>
 
-  <!-- GitHub токен настройки -->
-  <div id="gh-setup" style="display:none;background:#fff8f0;border-bottom:2px solid var(--border);padding:14px 20px;">
-    <div style="font-size:0.88rem;font-weight:700;margin-bottom:10px;">🔑 Свържи с GitHub за автоматично публикуване</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
-      <div class="f" style="flex:1;min-width:200px;margin:0;">
-        <label>GitHub токен (repo scope)</label>
-        <input type="password" id="gh-token-input" placeholder="ghp_xxxxxxxxxxxx"/>
-        <span class="hint">github.com → Settings → Developer settings → Personal access tokens → Classic → scope: <strong>repo</strong></span>
+  <!-- Еднократна настройка -->
+  <div id="gh-setup" style="display:none;background:#fff8f0;border-bottom:2px solid var(--border);padding:20px 24px;">
+    <div style="font-size:1rem;font-weight:800;margin-bottom:6px;color:#5a3e00;">🔐 Еднократна настройка (само първия път)</div>
+    <div style="font-size:0.84rem;color:#7a5c00;margin-bottom:16px;max-width:680px;line-height:1.6;">
+      За да работи бутонът „Запази", трябва да въведете код за достъп веднъж.
+      След това всичко се запазва с един клик. Кодът се пази автоматично в браузъра.
+      <br><strong>Не знаете кода?</strong> Попитайте Кристина.
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="f" style="flex:1;min-width:220px;margin:0;">
+        <label style="font-weight:700;">Код за достъп</label>
+        <input type="password" id="gh-token-input" placeholder="Въведете кода тук..."/>
       </div>
-      <div class="f" style="min-width:200px;margin:0;">
-        <label>GitHub repo</label>
-        <input type="text" id="gh-repo-input" value="Kristinaxoxox/animal-shelters-bulgaria"/>
-      </div>
-      <button class="btn btn-orange" onclick="saveGhSettings()">Свържи →</button>
+      <input type="hidden" id="gh-repo-input" value="Kristinaxoxox/animal-shelters-bulgaria"/>
+      <button class="btn btn-orange" style="padding:12px 24px;font-size:0.95rem;" onclick="saveGhSettings()">✅ Потвърди и запази</button>
       <button class="btn btn-outline btn-sm" onclick="document.getElementById('gh-setup').style.display='none'">Откажи</button>
     </div>
   </div>
@@ -568,11 +579,11 @@ function markChanged() {
   bar.style.display = 'flex';
   const btn = document.getElementById('dl-publish-btn');
   if (isGhConnected()) {
-    btn.textContent = '🚀 Публикувай промените';
-    document.getElementById('dl-bar-msg').textContent = '✅ Имаш незапазени промени';
+    btn.innerHTML = '💾 Запази всичко на сайта';
+    document.getElementById('dl-bar-msg').textContent = 'Имаш незапазени промени!';
   } else {
-    btn.textContent = '🔑 Свържи с GitHub и публикувай';
-    document.getElementById('dl-bar-msg').textContent = '✅ Имаш незапазени промени';
+    btn.innerHTML = '🔐 Настрой и запази на сайта';
+    document.getElementById('dl-bar-msg').textContent = 'Имаш незапазени промени!';
   }
 }
 
@@ -586,7 +597,7 @@ async function publishChanges() {
   }
   const btn = document.getElementById('dl-publish-btn');
   btn.disabled = true;
-  btn.textContent = '⏳ Публикуване...';
+  btn.innerHTML = '⏳ Запазване...';
   try {
     // Get current file SHA if we don't have it
     if (!ghFileSha) {
@@ -615,13 +626,13 @@ async function publishChanges() {
     ghFileSha = data.content.sha;
     hasChanges = false;
     document.getElementById('dl-bar').style.display = 'none';
-    toast('🚀 Публикувано! Картата ще се обнови след ~1 мин.', 'ok');
+    toast('✅ Запазено! Картата на сайта ще се обнови след ~1 минута.', 'ok');
   } catch(e) {
     toast('Грешка: ' + e.message, 'err');
-    btn.textContent = '🚀 Публикувай промените';
+    btn.innerHTML = '💾 Запази всичко на сайта';
   } finally {
     btn.disabled = false;
-    btn.textContent = isGhConnected() ? '🚀 Публикувай промените' : '🔑 Свържи с GitHub и публикувай';
+    btn.innerHTML = isGhConnected() ? '💾 Запази всичко на сайта' : '🔐 Настрой и запази на сайта';
   }
 }
 
