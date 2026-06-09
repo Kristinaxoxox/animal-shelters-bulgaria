@@ -25,6 +25,19 @@
   <meta name="twitter:description" content="Намери приют за бездомни животни близо до теб — адреси, работно време и контакти на едно място."/>
   <meta name="twitter:image" content="https://kristinaxoxox.github.io/animal-shelters-bulgaria/logo_clean.png"/>
 
+  <!-- Performance: preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preconnect" href="https://unpkg.com"/>
+  <link rel="dns-prefetch" href="https://tile.openstreetmap.org"/>
+  <link rel="dns-prefetch" href="https://a.tile.openstreetmap.org"/>
+  <link rel="dns-prefetch" href="https://b.tile.openstreetmap.org"/>
+  <link rel="dns-prefetch" href="https://c.tile.openstreetmap.org"/>
+
+  <!-- Preload critical resources -->
+  <link rel="preload" href="shelters.json" as="fetch" crossorigin/>
+  <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" as="style"/>
+
   <link rel="icon" type="image/png" href="tab-logo.png"/>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet"/>
