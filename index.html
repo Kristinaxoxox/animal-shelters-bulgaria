@@ -1781,6 +1781,12 @@ fetch('shelters.json').then(r => r.json()).then(data => {
   document.getElementById('catalogue').innerHTML = document.getElementById('map').innerHTML;
 });
 
+// ── Tab title trick ──
+const _titleDefault = document.title;
+document.addEventListener('visibilitychange', () => {
+  document.title = document.hidden ? '🐾 Запиши се за разходка!' : _titleDefault;
+});
+
 </script>
 </body>
 </html>
