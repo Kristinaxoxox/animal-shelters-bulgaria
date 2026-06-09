@@ -1756,7 +1756,17 @@ fetch('shelters.json').then(r => r.json()).then(data => {
   applyFilters();
   setView(localStorage.getItem('shelterView') || 'map');
   detectLocation();
-}).catch(e => console.error('Failed to load shelters.json:', e));
+}).catch(e => {
+  console.error('Failed to load shelters.json:', e);
+  document.getElementById('map').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;color:#cd6a18;font-family:Montserrat,sans-serif;">
+      <div style="font-size:2rem;">⚠️</div>
+      <div style="font-weight:700;">Грешка при зареждане на данните</div>
+      <div style="font-size:0.85rem;color:#888;">${e.message}</div>
+      <button onclick="location.reload()" style="margin-top:8px;padding:10px 22px;background:#cd6a18;color:#fff;border:none;border-radius:8px;font-family:inherit;font-weight:700;cursor:pointer;">🔄 Опитай пак</button>
+    </div>`;
+  document.getElementById('catalogue').innerHTML = document.getElementById('map').innerHTML;
+});
 
 </script>
 </body>
