@@ -1,39 +1,47 @@
 const sharp = require('sharp');
 
-const width = 1200, height = 630;
+const W = 1200, H = 630;
 
-const svg = `
-<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+const overlay = `
+<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#e07b2a"/>
-      <stop offset="100%" stop-color="#cd6a18"/>
+      <stop offset="0%" stop-color="#cd6a18" stop-opacity="0.88"/>
+      <stop offset="100%" stop-color="#9c4f10" stop-opacity="0.88"/>
     </linearGradient>
   </defs>
-  <rect width="${width}" height="${height}" fill="url(#bg)"/>
-  <g opacity="0.08">
-    <circle cx="1050" cy="80" r="220" fill="#fff"/>
-    <circle cx="120" cy="560" r="260" fill="#fff"/>
-  </g>
+  <rect width="${W}" height="${H}" fill="url(#bg)"/>
   <text x="600" y="330" font-family="Montserrat, Arial, sans-serif" font-size="64" font-weight="800" fill="#ffffff" text-anchor="middle">
     Приюти за животни в България
   </text>
   <text x="600" y="400" font-family="Montserrat, Arial, sans-serif" font-size="34" font-weight="600" fill="#fdf5ec" text-anchor="middle">
-    Намери приют близо до теб и се запиши за разходка
+    Открий приют близо до теб и научи как да помогнеш
   </text>
-  <text x="600" y="470" font-family="Montserrat, Arial, sans-serif" font-size="28" font-weight="500" fill="#3a3a3a" text-anchor="middle">
+  <text x="600" y="470" font-family="Montserrat, Arial, sans-serif" font-size="28" font-weight="500" fill="#3a2415" text-anchor="middle">
     🐾 Мечо и Приятели — map.mecho-ngo.bg
   </text>
 </svg>
 `;
 
 (async () => {
+  const overlaySvg = await sharp(Buffer.from(overlay)).png().toBuffer();
+
+  const background = await sharp('images/burgas2.jpg')
+    .resize(W, H, { fit: 'cover' })
+    .blur(12)
+    .toBuffer();
+
   const logo = await sharp('logo_clean.png').resize({ width: 360 }).toBuffer();
   const logoMeta = await sharp(logo).metadata();
 
-  await sharp(Buffer.from(svg))
-    .composite([{ input: logo, left: Math.round((width - logoMeta.width) / 2), top: 60 }])
-    .jpeg({ quality: 88 })
+  const withOverlay = await sharp(background)
+    .composite([{ input: overlaySvg, left: 0, top: 0 }])
+    .png()
+    .toBuffer();
+
+  await sharp(withOverlay)
+    .composite([{ input: logo, left: Math.round((W - logoMeta.width) / 2), top: 60 }])
+    .jpeg({ quality: 95 })
     .toFile('social-card.jpg');
 
   console.log('done');
