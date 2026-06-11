@@ -1,6 +1,6 @@
 const sharp = require('sharp');
 
-const W = 1200, H = 630;
+const W = 1600, H = 838;
 
 const overlay = `
 <svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
@@ -11,13 +11,13 @@ const overlay = `
     </linearGradient>
   </defs>
   <rect width="${W}" height="${H}" fill="url(#bg)"/>
-  <text x="600" y="330" font-family="Montserrat, Arial, sans-serif" font-size="64" font-weight="800" fill="#ffffff" text-anchor="middle">
+  <text x="800" y="440" font-family="Montserrat, Arial, sans-serif" font-size="85" font-weight="800" fill="#ffffff" text-anchor="middle">
     Приюти за животни в България
   </text>
-  <text x="600" y="400" font-family="Montserrat, Arial, sans-serif" font-size="34" font-weight="600" fill="#fdf5ec" text-anchor="middle">
+  <text x="800" y="533" font-family="Montserrat, Arial, sans-serif" font-size="45" font-weight="600" fill="#fdf5ec" text-anchor="middle">
     Открий приют близо до теб и научи как да помогнеш
   </text>
-  <text x="600" y="470" font-family="Montserrat, Arial, sans-serif" font-size="28" font-weight="500" fill="#3a2415" text-anchor="middle">
+  <text x="800" y="627" font-family="Montserrat, Arial, sans-serif" font-size="37" font-weight="500" fill="#3a2415" text-anchor="middle">
     🐾 Мечо и Приятели — map.mecho-ngo.bg
   </text>
 </svg>
@@ -31,7 +31,7 @@ const overlay = `
     .blur(12)
     .toBuffer();
 
-  const logo = await sharp('logo_clean.png').resize({ width: 360 }).toBuffer();
+  const logo = await sharp('logo_clean.png').resize({ width: 480 }).toBuffer();
   const logoMeta = await sharp(logo).metadata();
 
   const withOverlay = await sharp(background)
@@ -40,7 +40,7 @@ const overlay = `
     .toBuffer();
 
   await sharp(withOverlay)
-    .composite([{ input: logo, left: Math.round((W - logoMeta.width) / 2), top: 60 }])
+    .composite([{ input: logo, left: Math.round((W - logoMeta.width) / 2), top: 80 }])
     .jpeg({ quality: 95 })
     .toFile('social-card.jpg');
 
