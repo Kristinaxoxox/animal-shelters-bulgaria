@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Приюти за животни в България — Мечо и Приятели | Карта и контакти</title>
-  <meta name="description" content="Интерактивна карта на приютите за бездомни животни в България — адреси, работно време, телефони и контакти. Намери приют близо до теб и се запиши за разходка с куче."/>
+  <meta name="description" content="Интерактивна карта на приютите за бездомни животни в България — адреси, работно време, телефони и контакти. Намери приют близо до теб и го посети за разходка."/>
   <meta name="keywords" content="приюти за животни България, общински приют кучета, бездомни животни, разходка с кучета, осиновяване на куче, доброволчество приют, Мечо и Приятели"/>
   <meta name="author" content="Мечо и Приятели"/>
   <meta name="robots" content="index, follow"/>
@@ -15,7 +15,7 @@
   <meta property="og:locale" content="bg_BG"/>
   <meta property="og:site_name" content="Мечо и Приятели"/>
   <meta property="og:title" content="Приюти за животни в България — Мечо и Приятели"/>
-  <meta property="og:description" content="Интерактивна карта на приютите за бездомни животни в България — адреси, работно време, телефони и контакти. Намери приют близо до теб и се запиши за разходка."/>
+  <meta property="og:description" content="Интерактивна карта на приютите за бездомни животни в България — адреси, работно време, телефони и контакти. Намери приют близо до теб и го посети за разходка."/>
   <meta property="og:image" content="https://map.mecho-ngo.bg/social-card.jpg"/>
   <meta property="og:image:width" content="1600"/>
   <meta property="og:image:height" content="838"/>
@@ -1045,7 +1045,7 @@
        onclick="setView('map')" title="Обратно към картата"/>
   <div class="header-text">
     <h1>Посети за разходка</h1>
-    <p>Намери приют близо до теб и се запиши за разходка</p>
+    <p>Намери приют близо до теб и го посети за разходка</p>
   </div>
   <div class="header-socials">
     <a class="header-social-btn" href="https://www.facebook.com/MechoNgo" target="_blank" title="Facebook">
@@ -1473,7 +1473,7 @@ function buildCard(s) {
     : '';
   const cardImgHtml = hasImgs
     ? `<div class="card-image-wrap" data-idx="${idx}" data-cur="0">
-         <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name} — приют за животни" loading="lazy" style="cursor:zoom-in;" onclick="event.stopPropagation();openCardLightbox(${idx})">
+         <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name} — приют за животни" loading="lazy">
          ${arrows}${dots}
        </div>`
     : `<div class="card-image-placeholder">🐾</div>`;

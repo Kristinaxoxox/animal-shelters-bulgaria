@@ -1473,7 +1473,7 @@ function buildCard(s) {
     : '';
   const cardImgHtml = hasImgs
     ? `<div class="card-image-wrap" data-idx="${idx}" data-cur="0">
-         <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name} — приют за животни" loading="lazy" style="cursor:zoom-in;" onclick="event.stopPropagation();openCardLightbox(${idx})">
+         <img id="card-img-${idx}" src="${s.gallery[0]}" alt="${s.name} — приют за животни" loading="lazy">
          ${arrows}${dots}
        </div>`
     : `<div class="card-image-placeholder">🐾</div>`;
