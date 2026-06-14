@@ -1702,12 +1702,6 @@ window.addEventListener('resize', () => {
 // ── Lightbox ──
 let _lbImages = [], _lbIndex = 0, _lbTouchX = 0;
 
-function openCardLightbox(shelterIdx) {
-  const s = shelters[shelterIdx];
-  if (!s.gallery || s.gallery.length === 0) return;
-  const cur = (window._cardCur && window._cardCur[shelterIdx]) || 0;
-  openLightbox(s.gallery, cur);
-}
 function openLightbox(images, startIndex) {
   _lbImages = typeof images === 'string' ? JSON.parse(images) : images;
   _lbIndex = startIndex;
