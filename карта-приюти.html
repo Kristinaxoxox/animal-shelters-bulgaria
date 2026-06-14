@@ -1336,6 +1336,16 @@ function openPanel(idx) {
   document.getElementById('panel-body').innerHTML = html;
   document.getElementById('shelter-panel').classList.add('open');
   document.getElementById('panel-overlay').classList.add('open');
+  resetPageZoom();
+}
+
+// Reset mobile pinch-zoom so the panel is fully visible
+function resetPageZoom() {
+  const viewport = document.querySelector('meta[name="viewport"]');
+  if (!viewport) return;
+  const original = viewport.getAttribute('content');
+  viewport.setAttribute('content', original + ', maximum-scale=1.0');
+  setTimeout(() => viewport.setAttribute('content', original), 350);
 }
 
 function closePanel() {
