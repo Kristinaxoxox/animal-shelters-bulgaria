@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://kristinaxoxox.github.io/animal-shelters-bulgaria/sitemap.xml
+Sitemap: https://map.mecho-ngo.bg/sitemap.xml
