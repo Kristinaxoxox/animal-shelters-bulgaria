@@ -1754,6 +1754,29 @@ document.getElementById('lightbox').addEventListener('touchend', e => {
 
 
 // ── Load shelters from JSON and initialise ──
+// Inject ItemList structured data for the shelters so search engines can
+// index individual shelter names/locations even before map interaction
+function injectShelterListSchema(list) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": list.map((s, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "item": {
+        "@type": "LocalBusiness",
+        "name": s.name,
+        "address": s.address || s.city,
+        "areaServed": s.city
+      }
+    }))
+  };
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify(schema);
+  document.head.appendChild(script);
+}
+
 fetch('shelters.json').then(r => r.json()).then(data => {
   shelters = data.sort((a,b) => a.name.localeCompare(b.name));
   shelters.forEach(s => {
@@ -1773,6 +1796,7 @@ fetch('shelters.json').then(r => r.json()).then(data => {
   applyFilters();
   setView(localStorage.getItem('shelterView') || 'map');
   detectLocation();
+  injectShelterListSchema(shelters);
 }).catch(e => {
   console.error('Failed to load shelters.json:', e);
   document.getElementById('map').innerHTML = `
