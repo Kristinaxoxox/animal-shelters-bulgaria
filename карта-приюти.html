@@ -190,6 +190,38 @@
       font-size: 0.8rem; color: #888; white-space: nowrap;
     }
 
+    /* Clear filters */
+    .clear-filters-btn {
+      font-size: 0.8rem; font-weight: 600;
+      color: #cd6a18; background: none;
+      border: 1.5px solid #e8b07a; border-radius: 20px;
+      padding: 5px 12px; cursor: pointer;
+      white-space: nowrap;
+      font-family: 'Montserrat', sans-serif;
+      transition: background 0.15s, color 0.15s;
+    }
+    .clear-filters-btn:hover { background: #cd6a18; color: white; }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px;
+      background: #fdf5ec;
+      z-index: 500;
+      color: #cd6a18; font-weight: 600; font-size: 0.95rem;
+      transition: opacity 0.25s;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .loading-spinner {
+      width: 36px; height: 36px;
+      border: 4px solid #f5d4ae;
+      border-top-color: #cd6a18;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* View toggle */
     .view-toggle {
       display: flex;
@@ -1088,6 +1120,7 @@
 
   <div class="controls-end">
     <span class="shelter-count" id="shelterCount"></span>
+    <button class="clear-filters-btn" id="clearFiltersBtn" onclick="clearFilters()" style="display:none;">✕ Изчисти филтри</button>
     <div class="view-toggle">
       <button id="btn-map" class="active" onclick="setView('map')">🗺 Карта</button>
       <button id="btn-cat" onclick="setView('catalogue')">📋 Справочник</button>
@@ -1099,6 +1132,10 @@
 
 <div id="map">
   <button id="map-fullscreen-btn" title="Цял екран" onclick="toggleMapFullscreen()">⛶</button>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div>Зареждане на приютите…</div>
+  </div>
 </div>
 <div id="catalogue"></div>
 
@@ -1571,8 +1608,19 @@ function applyFilters() {
   });
 
   document.getElementById('shelterCount').textContent = `${visible} от ${shelters.length} приюта`;
+
+  const filtersActive = city !== 'all' || day !== 'all' || q !== '';
+  document.getElementById('clearFiltersBtn').style.display = filtersActive ? '' : 'none';
+
   buildCatalogue(filteredShelters);
   if (currentView === 'catalogue') equalizeCards();
+}
+
+function clearFilters() {
+  document.getElementById('cityFilter').value = 'all';
+  document.getElementById('dayFilter').value = 'all';
+  document.getElementById('searchInput').value = '';
+  applyFilters();
 }
 
 // ── Equal-height flip cards ──
@@ -1797,8 +1845,10 @@ fetch('shelters.json').then(r => r.json()).then(data => {
   setView(localStorage.getItem('shelterView') || 'map');
   detectLocation();
   injectShelterListSchema(shelters);
+  document.getElementById('loadingOverlay').classList.add('hidden');
 }).catch(e => {
   console.error('Failed to load shelters.json:', e);
+  document.getElementById('loadingOverlay').classList.add('hidden');
   document.getElementById('map').innerHTML = `
     <div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;color:#cd6a18;font-family:Montserrat,sans-serif;">
       <div style="font-size:2rem;">⚠️</div>
