@@ -800,39 +800,8 @@
     ══════════════════════════════════ */
     @media (max-width: 640px) {
 
-      /* ── Header: stacked layout on mobile ── */
-      header {
-        flex-direction: column;
-        align-items: center;
-        padding: 14px 16px 12px;
-        gap: 6px;
-        min-height: unset;
-        overflow: hidden;
-        position: relative;
-      }
-      header img.logo {
-        height: 72px;
-        margin: 0;
-        transform: scale(1.35);
-      }
-      .header-text { text-align: center; }
-      header h1 {
-        font-size: 0.95rem;
-        letter-spacing: 0;
-        line-height: 1.3;
-        text-transform: none;
-      }
-      header p {
-        display: block;
-        font-size: 0.75rem;
-      }
-      /* Hide socials on mobile — use the 🗺 button instead */
-      .header-socials { display: none; }
-
-      /* Map button hidden on mobile — view toggle below covers this */
-      .header-map-btn {
-        display: none !important;
-      }
+      /* ── Header: completely hidden on mobile ── */
+      header { display: none !important; }
 
       /* ── Controls: 2-col grid ── */
       .controls {
@@ -1142,8 +1111,6 @@
     <input type="text" id="searchInput" placeholder="Град или приют..."/>
   </div>
 
-  <button class="mobile-header-btn" id="mobileHeaderBtn" onclick="toggleMobileHeader()">🐾 Мечо</button>
-
   <div class="controls-end">
     <span class="shelter-count" id="shelterCount"></span>
     <button class="clear-filters-btn" id="clearFiltersBtn" onclick="clearFilters()" style="display:none;">✕ Изчисти филтри</button>
@@ -1439,24 +1406,10 @@ function scrollToMap() {
   window.addEventListener('load', syncHeight);
   syncHeight();
 
-  // On mobile: start with header hidden
-  if (window.innerWidth <= 640) {
-    header.classList.add('header-hidden');
-  }
-
   window.addEventListener('scroll', function() {
-    if (window.innerWidth > 640) {
-      header.classList.toggle('header-hidden', window.scrollY > 10);
-    }
+    header.classList.toggle('header-hidden', window.scrollY > 10);
   }, { passive: true });
 })();
-
-function toggleMobileHeader() {
-  const header = document.querySelector('header');
-  const btn = document.getElementById('mobileHeaderBtn');
-  const isHidden = header.classList.toggle('header-hidden');
-  btn.textContent = isHidden ? '🐾 Мечо' : '✕ Затвори';
-}
 
 
 // ── Map fullscreen ──
