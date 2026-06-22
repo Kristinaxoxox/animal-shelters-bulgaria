@@ -1434,9 +1434,10 @@ function scrollToMap() {
     document.documentElement.style.setProperty('--topbar-h', h + 'px');
   }
 
+  // Set spacer once after load — do NOT update on every resize/scroll
+  // (continuous updates cause layout shift and scroll-position jumps on mobile)
+  window.addEventListener('load', syncHeight);
   syncHeight();
-  new ResizeObserver(syncHeight).observe(topBar);
-  header.addEventListener('transitionend', syncHeight);
 
   // On mobile: start with header hidden
   if (window.innerWidth <= 640) {
