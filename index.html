@@ -1188,14 +1188,10 @@ let shelters = [];
 const bulgariaBounds = L.latLngBounds(
   L.latLng(41.23, 22.35), L.latLng(44.22, 28.68)
 );
-const isMobile = window.innerWidth <= 640;
 const map = L.map('map', {
   center: [42.7339, 25.4858], zoom: 7, minZoom: 6, maxZoom: 15,
   maxBounds: bulgariaBounds, maxBoundsViscosity: 1.0,
-  scrollWheelZoom: false,
-  dragging: !isMobile,
-  touchZoom: !isMobile,
-  tap: !isMobile
+  scrollWheelZoom: false
 });
 
 // Enable scroll zoom only while the user is actively interacting with the map
