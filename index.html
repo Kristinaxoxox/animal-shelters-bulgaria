@@ -190,6 +190,30 @@
       font-size: 0.8rem; color: #888; white-space: nowrap;
     }
 
+    /* Mobile header toggle button */
+    .mobile-header-btn {
+      display: none;
+    }
+    @media (max-width: 640px) {
+      .mobile-header-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: 1.5px solid #e8b07a;
+        border-radius: 20px;
+        padding: 5px 12px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #cd6a18;
+        cursor: pointer;
+        font-family: 'Montserrat', sans-serif;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .mobile-header-btn:hover { background: #fde8d0; }
+    }
+
     /* Clear filters */
     .clear-filters-btn {
       font-size: 0.8rem; font-weight: 600;
@@ -1118,6 +1142,8 @@
     <input type="text" id="searchInput" placeholder="Град или приют..."/>
   </div>
 
+  <button class="mobile-header-btn" id="mobileHeaderBtn" onclick="toggleMobileHeader()">🐾 Мечо</button>
+
   <div class="controls-end">
     <span class="shelter-count" id="shelterCount"></span>
     <button class="clear-filters-btn" id="clearFiltersBtn" onclick="clearFilters()" style="display:none;">✕ Изчисти филтри</button>
@@ -1412,10 +1438,24 @@ function scrollToMap() {
   new ResizeObserver(syncHeight).observe(topBar);
   header.addEventListener('transitionend', syncHeight);
 
+  // On mobile: start with header hidden
+  if (window.innerWidth <= 640) {
+    header.classList.add('header-hidden');
+  }
+
   window.addEventListener('scroll', function() {
-    header.classList.toggle('header-hidden', window.scrollY > 10);
+    if (window.innerWidth > 640) {
+      header.classList.toggle('header-hidden', window.scrollY > 10);
+    }
   }, { passive: true });
 })();
+
+function toggleMobileHeader() {
+  const header = document.querySelector('header');
+  const btn = document.getElementById('mobileHeaderBtn');
+  const isHidden = header.classList.toggle('header-hidden');
+  btn.textContent = isHidden ? '🐾 Мечо' : '✕ Затвори';
+}
 
 
 // ── Map fullscreen ──
