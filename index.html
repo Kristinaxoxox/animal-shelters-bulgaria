@@ -296,6 +296,7 @@
     .catalogue-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-auto-rows: 390px;
       gap: 20px;
       max-width: 1200px;
       margin: 0 auto;
@@ -338,6 +339,7 @@
       overflow: visible;
       cursor: pointer;
       border-radius: 16px;
+      height: 100%;
     }
     .card-inner {
       position: relative;
@@ -828,7 +830,7 @@
 
       /* ── Catalogue ── */
       #catalogue { padding: 12px; }
-      .catalogue-grid { grid-template-columns: 1fr; gap: 14px; }
+      .catalogue-grid { grid-template-columns: 1fr; grid-auto-rows: 350px; gap: 14px; }
 
       /* ── Catalogue cards ── */
       .card-image-wrap { height: 170px; }
@@ -1594,27 +1596,7 @@ function clearFilters() {
 }
 
 // ── Equal-height flip cards ──
-function equalizeCards() {
-  setTimeout(() => {
-    const cards  = document.querySelectorAll('.shelter-card');
-    const inners = document.querySelectorAll('.card-inner');
-    const fronts = document.querySelectorAll('.card-front');
-
-    cards.forEach(c  => c.style.height  = '');
-    inners.forEach(i => i.style.height  = '');
-
-    fronts.forEach(f => { f.style.position = 'relative'; f.style.height = 'auto'; });
-    let maxH = 0;
-    fronts.forEach(f => { if (f.offsetHeight > maxH) maxH = f.offsetHeight; });
-    fronts.forEach(f => { f.style.position = ''; f.style.height = ''; });
-
-    if (maxH > 0) {
-      const h = maxH + 'px';
-      cards.forEach(c  => c.style.height = h);
-      inners.forEach(i => i.style.height = h);
-    }
-  }, 80);
-}
+function equalizeCards() {} // heights handled by CSS grid-auto-rows
 
 document.getElementById('cityFilter').addEventListener('change', applyFilters);
 document.getElementById('dayFilter').addEventListener('change', applyFilters);
