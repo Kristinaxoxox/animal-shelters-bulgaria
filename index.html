@@ -960,30 +960,80 @@
       padding: 0 24px;
     }
     .about-body.open {
-      max-height: 600px;
+      max-height: 800px;
       padding: 32px 24px 40px;
     }
     .about-inner {
-      max-width: 760px;
+      max-width: 640px;
       margin: 0 auto;
+    }
+
+    /* Contact links */
+    .contact-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .contact-link:hover { opacity: 0.82; }
+    .contact-link.fb   { background: #1877f2; color: white; }
+    .contact-link.ig   { background: #e1306c; color: white; }
+    .contact-link.web  { background: #cd6a18; color: white; }
+    .contact-link.mail { background: #3a2415; color: white; }
+
+    /* Contact form */
+    .contact-form { display: flex; flex-direction: column; gap: 12px; }
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #e8b07a;
+      border-radius: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.87rem;
+      background: #fffaf5;
+      color: #3a3a3a;
+      outline: none;
+      resize: vertical;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus { border-color: #cd6a18; }
+    .contact-form textarea { min-height: 100px; }
+    .contact-form-btn {
+      align-self: center;
+      padding: 10px 32px;
+      background: #cd6a18;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .contact-form-btn:hover { background: #a85412; }
+    .contact-form-success {
       text-align: center;
+      color: #5a9e4c;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: none;
     }
-    .about-inner h2 {
-      color: #cd6a18;
-      font-size: 1.4rem;
-      margin-bottom: 16px;
-      letter-spacing: 0.3px;
-    }
-    .about-inner p {
-      color: #5a5048;
-      font-size: 0.95rem;
-      line-height: 1.7;
-      margin-bottom: 12px;
-    }
-    .about-inner p:last-child { margin-bottom: 0; }
     @media (max-width: 640px) {
-      .about-inner h2 { font-size: 1.2rem; }
-      .about-inner p { font-size: 0.88rem; }
+      .about-body.open { max-height: 900px; }
     }
 
     /* ── Footer ── */
@@ -1115,15 +1165,37 @@
 
 <section class="about-section">
   <button class="about-toggle" id="about-toggle" onclick="toggleAbout()" aria-expanded="false">
-    <span>За проекта</span>
+    <span>Свържи се с нас</span>
     <span class="arrow">▼</span>
   </button>
   <div class="about-body" id="about-body">
     <div class="about-inner">
-      <h2>За проекта „Приюти за животни в България"</h2>
-      <p>Тази интерактивна карта е създадена от екипа на „Мечо и Приятели" — доброволческа инициатива срещу насилието над животни в България. Целта е на едно място да бъде събрана актуална информация за общинските и частните приюти за бездомни кучета и котки в страната.</p>
-      <p>Тук ще намериш адреси, работно време, телефони за контакт и насоки как да посетиш приют близо до теб, да се запишеш за разходка с куче или да помогнеш с дарение на храна и материали. Всеки приют разполага с галерия от снимки и информация какво точно е нужно в момента.</p>
-      <p>Ако представляваш приют и искаш да добавиш или коригираш информация на картата, свържи се с нас през социалните мрежи в горния десен ъгъл на страницата.</p>
+      <div class="contact-links">
+        <a class="contact-link fb" href="https://www.facebook.com/MechoNgo" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          Facebook
+        </a>
+        <a class="contact-link ig" href="https://www.instagram.com/mechoandfriendsinsta" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          Instagram
+        </a>
+        <a class="contact-link web" href="https://www.mecho-ngo.bg/" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Уебсайт
+        </a>
+        <a class="contact-link mail" href="mailto:contact@mecho-ngo.bg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          contact@mecho-ngo.bg
+        </a>
+      </div>
+
+      <form class="contact-form" onsubmit="submitContact(event)">
+        <input type="text" id="cf-name" placeholder="Твоето име" required />
+        <input type="email" id="cf-email" placeholder="Имейл за обратна връзка" required />
+        <textarea id="cf-msg" placeholder="Съобщение — въпрос, корекция или предложение за нов приют…" required></textarea>
+        <button type="submit" class="contact-form-btn">Изпрати →</button>
+      </form>
+      <div class="contact-form-success" id="cf-success">✓ Съобщението е изпратено! Ще се свържем с теб скоро.</div>
     </div>
   </div>
 </section>
@@ -1401,6 +1473,18 @@ function toggleAbout() {
   const open = body.classList.toggle('open');
   btn.classList.toggle('open', open);
   btn.setAttribute('aria-expanded', open);
+}
+
+function submitContact(e) {
+  e.preventDefault();
+  const name  = document.getElementById('cf-name').value.trim();
+  const email = document.getElementById('cf-email').value.trim();
+  const msg   = document.getElementById('cf-msg').value.trim();
+  const subject = encodeURIComponent('Съобщение от картата — ' + name);
+  const body    = encodeURIComponent('От: ' + name + ' <' + email + '>\n\n' + msg);
+  window.location.href = 'mailto:contact@mecho-ngo.bg?subject=' + subject + '&body=' + body;
+  document.querySelector('.contact-form').style.display = 'none';
+  document.getElementById('cf-success').style.display = 'block';
 }
 
 let mapIsFullscreen = false;
