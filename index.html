@@ -823,9 +823,26 @@
         width: 100%;
         margin-left: 0;
         justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-width: 0;
       }
-      .shelter-count { font-size: 0.75rem; }
-      .view-toggle button { font-size: 0.78rem; padding: 6px 12px; }
+      .shelter-count {
+        font-size: 0.75rem;
+        flex-shrink: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .view-toggle { flex: 1 1 auto; min-width: 170px; max-width: 100%; }
+      .view-toggle button {
+        font-size: 0.78rem;
+        padding: 6px 8px;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
 
       /* ── Map ── */
       #map { height: calc(100svh - 136px); }
@@ -1113,6 +1130,12 @@
       header h1 { font-size: 0.8rem; }
       header p { display: none; }
       header img.logo { height: 40px; }
+      .controls { padding: 10px 8px; }
+      .filter-group label { font-size: 0.72rem; min-width: auto; }
+      .filter-group select { font-size: 0.76rem; padding: 7px 5px; }
+      .view-toggle button { font-size: 0.74rem; padding: 6px 5px; }
+      .toggle-emoji { display: none; }
+      .shelter-count { font-size: 0.72rem; }
     }
   </style>
   <script type="application/ld+json">
@@ -1196,8 +1219,8 @@
     <span class="shelter-count" id="shelterCount"></span>
     <button class="clear-filters-btn" id="clearFiltersBtn" onclick="clearFilters()" style="display:none;">✕ Изчисти филтри</button>
     <div class="view-toggle">
-      <button id="btn-map" class="active" onclick="setView('map')">🗺 Карта</button>
-      <button id="btn-cat" onclick="setView('catalogue')">📋 Справочник</button>
+      <button id="btn-map" class="active" onclick="setView('map')"><span class="toggle-emoji">🗺 </span>Карта</button>
+      <button id="btn-cat" onclick="setView('catalogue')"><span class="toggle-emoji">📋 </span>Справочник</button>
     </div>
   </div>
 </div>
