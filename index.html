@@ -1823,7 +1823,6 @@ function showSuggestion(s, idx, distKm, today, hasWalksToday) {
     </div>`;
 
   document.querySelector('.controls').after(banner);
-  if (currentView === 'map') map.setView([s.lat, s.lng], 11);
 }
 
 function handleLocation(lat, lng) {
@@ -1836,23 +1835,6 @@ function handleLocation(lat, lng) {
   // Prefer nearest shelter with walks today, otherwise nearest overall
   const best = ranked.find(r => r.s.walkDays.includes(today)) || ranked[0];
   const idx  = shelters.indexOf(best.s);
-
-  // Instantly update all three filters
-  document.getElementById('dayFilter').value  = today;
-  document.getElementById('cityFilter').value = best.s.city;
-  document.getElementById('searchInput').value = '';
-  applyFilters();
-
-  // Briefly flash the shelter count so the user notices it updated
-  const countEl = document.getElementById('shelterCount');
-  countEl.style.transition = 'none';
-  countEl.style.color = '#cd6a18';
-  countEl.style.fontWeight = '700';
-  setTimeout(() => {
-    countEl.style.transition = 'color 0.8s, font-weight 0.8s';
-    countEl.style.color = '';
-    countEl.style.fontWeight = '';
-  }, 900);
 
   showSuggestion(best.s, idx, best.dist, today, best.s.walkDays.includes(today));
 }
