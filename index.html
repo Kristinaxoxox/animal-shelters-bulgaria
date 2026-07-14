@@ -1819,7 +1819,7 @@ function showSuggestion(s, idx, distKm, today, hasWalksToday) {
     <div class="suggestion-inner">
       <div class="suggestion-icon">📍</div>
       <div class="suggestion-text">
-        <div class="suggestion-title">Най-близкият приют до теб е <strong>${s.name}</strong></div>
+        <div class="suggestion-title">${hasWalksToday ? 'Най-близкият приют с разходки днес е' : 'Най-близкият приют до теб е'} <strong>${s.name}</strong></div>
         <div class="suggestion-sub">${s.city} · ${dist} от теб · ${walksNote}</div>
       </div>
       <button class="suggestion-btn" onclick="openPanel(${idx})">Виж →</button>
