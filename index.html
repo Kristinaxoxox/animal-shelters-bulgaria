@@ -1057,8 +1057,12 @@
     .city-index {
       background: #fff;
       border-top: 1px solid #f0e2d2;
-      padding: 40px 24px 48px;
     }
+    .city-index-body {
+      display: none;
+      padding: 32px 24px 48px;
+    }
+    .city-index-body.open { display: block; }
     .city-index h2 {
       text-align: center;
       color: #3a2415;
@@ -1270,13 +1274,19 @@
 </section>
 
 <section class="city-index" id="city-index">
-  <h2>Приюти за бездомни животни по градове в България</h2>
-  <p class="city-index-intro">
-    Търсиш приют за кучета близо до теб — за осиновяване, разходка с куче или доброволчество?
-    Картата събира общински и частни приюти за безстопанствени животни в цялата страна,
-    с адреси, работно време, дни за разходки и контакти. Избери град от списъка:
-  </p>
-  <div class="city-index-grid" id="city-index-grid"></div>
+  <button class="about-toggle" id="city-index-toggle" onclick="toggleCityIndex()" aria-expanded="false" aria-controls="city-index-body">
+    <span>Приюти по градове</span>
+    <span class="arrow">▼</span>
+  </button>
+  <div class="city-index-body" id="city-index-body">
+    <h2>Приюти за бездомни животни по градове в България</h2>
+    <p class="city-index-intro">
+      Търсиш приют за кучета близо до теб — за осиновяване, разходка с куче или доброволчество?
+      Картата събира общински и частни приюти за безстопанствени животни в цялата страна,
+      с адреси, работно време, дни за разходки и контакти. Избери град от списъка:
+    </p>
+    <div class="city-index-grid" id="city-index-grid"></div>
+  </div>
 </section>
 
 <footer>
@@ -1942,6 +1952,14 @@ function injectShelterListSchema(list) {
   script.type = 'application/ld+json';
   script.textContent = JSON.stringify(schema);
   document.head.appendChild(script);
+}
+
+function toggleCityIndex() {
+  const body = document.getElementById('city-index-body');
+  const btn = document.getElementById('city-index-toggle');
+  const open = body.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open);
 }
 
 // ── City index (SEO section): grouped list of shelters per city ──
