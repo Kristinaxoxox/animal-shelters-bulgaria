@@ -1390,12 +1390,14 @@ let shelters = [];
 // ============================================================
 
 // ── Map setup ──
+// Bulgaria plus a generous buffer, so northern/southern shelters
+// (Видин, Силистра, Кърджали) can be panned to comfortably when zoomed in
 const bulgariaBounds = L.latLngBounds(
-  L.latLng(41.23, 22.35), L.latLng(44.22, 28.68)
+  L.latLng(40.4, 21.0), L.latLng(45.1, 30.0)
 );
 const map = L.map('map', {
   center: [42.7339, 25.4858], zoom: 7, minZoom: 6, maxZoom: 15,
-  maxBounds: bulgariaBounds, maxBoundsViscosity: 1.0,
+  maxBounds: bulgariaBounds, maxBoundsViscosity: 0.8,
   scrollWheelZoom: false
 });
 
