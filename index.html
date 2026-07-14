@@ -252,6 +252,14 @@
        MAP
     ══════════════════════════════════ */
     html, body { background: #fdf5ec; }
+
+    /* Leaflet ships its own font stack — keep everything Montserrat */
+    .leaflet-container,
+    .leaflet-popup-content,
+    .leaflet-control-attribution,
+    .leaflet-control-zoom a {
+      font-family: 'Montserrat', sans-serif;
+    }
     #map { height: calc(100svh - var(--topbar-h, 115px)); width: 100%; position: relative; }
 
     /* Fullscreen map */
@@ -682,7 +690,7 @@
       text-transform: uppercase; letter-spacing: 0.4px;
     }
     .donate-value {
-      font-family: 'Courier New', monospace; font-size: 0.82rem;
+      font-family: 'Montserrat', sans-serif; font-size: 0.82rem;
       color: #3a3a3a; word-break: break-all;
     }
     .donate-link {
@@ -720,7 +728,7 @@
       text-transform: uppercase; min-width: 52px; flex-shrink: 0; padding-top: 1px;
     }
     .card-donate-value {
-      font-family: 'Courier New', monospace; font-size: 0.75rem;
+      font-family: 'Montserrat', sans-serif; font-size: 0.75rem;
       word-break: break-all; color: #3a3a3a;
     }
 
