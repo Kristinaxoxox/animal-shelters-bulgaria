@@ -1559,6 +1559,10 @@ function scrollToMap() {
   window.addEventListener('load', syncHeight);
   syncHeight();
 
+  // Exposed for one-off re-syncs when the top bar changes height
+  // (e.g. the location suggestion banner is added or dismissed)
+  window.syncTopBarHeight = syncHeight;
+
   window.addEventListener('scroll', function() {
     header.classList.toggle('header-hidden', window.scrollY > 10);
   }, { passive: true });
@@ -1819,10 +1823,17 @@ function showSuggestion(s, idx, distKm, today, hasWalksToday) {
         <div class="suggestion-sub">${s.city} · ${dist} от теб · ${walksNote}</div>
       </div>
       <button class="suggestion-btn" onclick="openPanel(${idx})">Виж →</button>
-      <button class="suggestion-close" onclick="document.getElementById('suggestion-banner').remove()">✕</button>
+      <button class="suggestion-close" onclick="dismissSuggestion()">✕</button>
     </div>`;
 
   document.querySelector('.controls').after(banner);
+  window.syncTopBarHeight();
+}
+
+function dismissSuggestion() {
+  const banner = document.getElementById('suggestion-banner');
+  if (banner) banner.remove();
+  window.syncTopBarHeight();
 }
 
 function handleLocation(lat, lng) {
