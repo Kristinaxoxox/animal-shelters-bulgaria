@@ -978,7 +978,16 @@
     @media (max-width: 640px) {
       .suggestion-title { font-size: 0.82rem; }
       .suggestion-sub { font-size: 0.70rem; }
-      .suggestion-btn { padding: 5px 10px; font-size: 0.75rem; }
+      /* Stack: icon + text + close on top, full-width button below,
+         so the text isn't squeezed into a narrow column */
+      .suggestion-inner { flex-wrap: wrap; align-items: flex-start; gap: 8px; }
+      .suggestion-btn {
+        order: 5;
+        flex: 1 1 100%;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        text-align: center;
+      }
     }
 
     /* ── Section toggles row (contact + city index) ── */
