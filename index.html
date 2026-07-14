@@ -693,6 +693,32 @@
       font-family: 'Montserrat', sans-serif; font-size: 0.82rem;
       color: #3a3a3a; word-break: break-all;
     }
+    /* IBANs: grouped digits, stronger weight, copy button */
+    .iban-value {
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      font-variant-numeric: tabular-nums;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+    .iban-copy {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 9px;
+      border: 1.5px solid #e8b07a;
+      border-radius: 12px;
+      background: #fff;
+      color: #cd6a18;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      cursor: pointer;
+      vertical-align: 1px;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .iban-copy:hover { background: #fde8d0; }
+    .iban-copy.copied { background: #5a9e4c; border-color: #5a9e4c; color: #fff; }
     .donate-link {
       display: inline-block; padding: 6px 14px;
       background: #cd6a18; color: white;
@@ -1408,6 +1434,35 @@ function cardImgNav(shelterIdx, dir) {
 }
 
 // ── Donate helpers ──
+// Display IBANs in groups of 4, the way banks print them
+function formatIban(iban) {
+  return iban.replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
+}
+
+function copyIban(btn, iban) {
+  const plain = iban.replace(/\s+/g, '');
+  const done = () => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Копирано';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1600);
+  };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = plain;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { if (document.execCommand('copy')) done(); } catch (_) {}
+    ta.remove();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(plain).then(done).catch(fallback);
+  } else {
+    fallback();
+  }
+}
+
 function buildDonatePanel(d) {
   if (!d) return '';
   const hasBank = d.iban || d.recipient || d.bank;
@@ -1415,7 +1470,7 @@ function buildDonatePanel(d) {
   if (!hasBank && !hasLinks) return '';
   let html = `<div class="donate-section"><div class="donate-section-title">Дарение</div>`;
   if (d.recipient) html += `<div class="donate-row"><span class="donate-label">Получател</span><span class="donate-value">${d.recipient}</span></div>`;
-  if (d.iban)      html += `<div class="donate-row"><span class="donate-label">IBAN</span><span class="donate-value">${d.iban}</span></div>`;
+  if (d.iban)      html += `<div class="donate-row"><span class="donate-label">IBAN</span><span class="donate-value iban-value">${formatIban(d.iban)} <button class="iban-copy" onclick="copyIban(this, '${d.iban}')">⧉ Копирай</button></span></div>`;
   if (d.bic)       html += `<div class="donate-row"><span class="donate-label">BIC</span><span class="donate-value">${d.bic}</span></div>`;
   if (d.bank)      html += `<div class="donate-row"><span class="donate-label">Банка</span><span class="donate-value">${d.bank}</span></div>`;
   if (d.note)      html += `<div class="donate-row"><span class="donate-label">Основание</span><span class="donate-value">${d.note}</span></div>`;
@@ -1435,7 +1490,7 @@ function buildDonateCard(d) {
   const s = 'font-size:0.72rem;padding:5px 11px;margin-top:4px;';
   let html = `<div class="card-donate"><div class="card-donate-title">Дарение</div>`;
   if (d.recipient) html += `<div class="card-donate-row"><span class="card-donate-label">Получател</span><span class="card-donate-value">${d.recipient}</span></div>`;
-  if (d.iban)      html += `<div class="card-donate-row"><span class="card-donate-label">IBAN</span><span class="card-donate-value">${d.iban}</span></div>`;
+  if (d.iban)      html += `<div class="card-donate-row"><span class="card-donate-label">IBAN</span><span class="card-donate-value iban-value">${formatIban(d.iban)} <button class="iban-copy" onclick="event.stopPropagation();copyIban(this, '${d.iban}')">⧉ Копирай</button></span></div>`;
   if (d.bic)       html += `<div class="card-donate-row"><span class="card-donate-label">BIC</span><span class="card-donate-value">${d.bic}</span></div>`;
   if (d.bank)      html += `<div class="card-donate-row"><span class="card-donate-label">Банка</span><span class="card-donate-value">${d.bank}</span></div>`;
   if (d.note)      html += `<div class="card-donate-row"><span class="card-donate-label">Основание</span><span class="card-donate-value">${d.note}</span></div>`;
