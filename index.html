@@ -1036,6 +1036,52 @@
       .about-body.open { max-height: 900px; }
     }
 
+    /* ── City index (SEO section) ── */
+    .city-index {
+      background: #fff;
+      border-top: 1px solid #f0e2d2;
+      padding: 40px 24px 48px;
+    }
+    .city-index h2 {
+      text-align: center;
+      color: #3a2415;
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+    }
+    .city-index-intro {
+      max-width: 640px;
+      margin: 0 auto 28px;
+      text-align: center;
+      font-size: 0.88rem;
+      color: #6b5b4b;
+      line-height: 1.6;
+    }
+    .city-index-grid {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .city-index-city h3 {
+      font-size: 0.92rem;
+      color: #cd6a18;
+      margin-bottom: 6px;
+    }
+    .city-index-city ul { list-style: none; }
+    .city-index-city li {
+      font-size: 0.82rem;
+      line-height: 1.5;
+      margin-bottom: 6px;
+      color: #6b5b4b;
+    }
+    .city-index-city a {
+      color: #3a2415;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .city-index-city a:hover { color: #cd6a18; text-decoration: underline; }
+
     /* ── Footer ── */
     footer {
       background: #2a1400;
@@ -1198,6 +1244,16 @@
       <div class="contact-form-success" id="cf-success">✓ Съобщението е изпратено! Ще се свържем с теб скоро.</div>
     </div>
   </div>
+</section>
+
+<section class="city-index" id="city-index">
+  <h2>Приюти за бездомни животни по градове в България</h2>
+  <p class="city-index-intro">
+    Търсиш приют за кучета близо до теб — за осиновяване, разходка с куче или доброволчество?
+    Картата събира общински и частни приюти за безстопанствени животни в цялата страна,
+    с адреси, работно време, дни за разходки и контакти. Избери град от списъка:
+  </p>
+  <div class="city-index-grid" id="city-index-grid"></div>
 </section>
 
 <footer>
@@ -1865,6 +1921,26 @@ function injectShelterListSchema(list) {
   document.head.appendChild(script);
 }
 
+// ── City index (SEO section): grouped list of shelters per city ──
+function buildCityIndex(list) {
+  const byCity = {};
+  list.forEach((s, idx) => {
+    (byCity[s.city] = byCity[s.city] || []).push({ s, idx });
+  });
+  const cities = Object.keys(byCity).sort((a, b) => a.localeCompare(b));
+  document.getElementById('city-index-grid').innerHTML = cities.map(city => `
+    <div class="city-index-city">
+      <h3>Приюти за животни — ${city}</h3>
+      <ul>
+        ${byCity[city].map(({ s, idx }) => {
+          const walk = s.walkDays && s.walkDays.length
+            ? ` Дни за разходки: ${s.walkDays.join(', ').toLowerCase()}.` : '';
+          return `<li><a href="#city-index" onclick="openPanel(${idx});return false;">${s.name}</a> — ${s.address}.${walk}</li>`;
+        }).join('')}
+      </ul>
+    </div>`).join('');
+}
+
 fetch('shelters.json').then(r => r.json()).then(data => {
   shelters = data.sort((a,b) => a.name.localeCompare(b.name));
   shelters.forEach(s => {
@@ -1885,6 +1961,7 @@ fetch('shelters.json').then(r => r.json()).then(data => {
   setView(localStorage.getItem('shelterView') || 'map');
   detectLocation();
   injectShelterListSchema(shelters);
+  buildCityIndex(shelters);
 }).catch(e => {
   console.error('Failed to load shelters.json:', e);
   document.getElementById('map').innerHTML = `
