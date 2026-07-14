@@ -938,10 +938,18 @@
       .suggestion-btn { padding: 5px 10px; font-size: 0.75rem; }
     }
 
+    /* ── Section toggles row (contact + city index) ── */
+    .section-toggles {
+      display: flex;
+      background: #fff;
+      border-top: 1px solid #f5d4ae;
+    }
+    .section-toggles .about-toggle { flex: 1; min-width: 0; }
+    .section-toggles .about-toggle + .about-toggle { border-left: 1px solid #f5d4ae; }
+
     /* ── About section ── */
     .about-section {
       background: #fff;
-      border-top: 1px solid #f5d4ae;
     }
     .about-toggle {
       display: flex;
@@ -1056,7 +1064,6 @@
     /* ── City index (SEO section) ── */
     .city-index {
       background: #fff;
-      border-top: 1px solid #f0e2d2;
     }
     .city-index-body {
       display: none;
@@ -1236,11 +1243,18 @@
 </div>
 <div id="catalogue"></div>
 
-<section class="about-section">
-  <button class="about-toggle" id="about-toggle" onclick="toggleAbout()" aria-expanded="false">
+<div class="section-toggles">
+  <button class="about-toggle" id="about-toggle" onclick="toggleAbout()" aria-expanded="false" aria-controls="about-body">
     <span>Свържи се с нас</span>
     <span class="arrow">▼</span>
   </button>
+  <button class="about-toggle" id="city-index-toggle" onclick="toggleCityIndex()" aria-expanded="false" aria-controls="city-index-body">
+    <span>Приюти по градове</span>
+    <span class="arrow">▼</span>
+  </button>
+</div>
+
+<section class="about-section">
   <div class="about-body" id="about-body">
     <div class="about-inner">
       <div class="contact-links">
@@ -1274,10 +1288,6 @@
 </section>
 
 <section class="city-index" id="city-index">
-  <button class="about-toggle" id="city-index-toggle" onclick="toggleCityIndex()" aria-expanded="false" aria-controls="city-index-body">
-    <span>Приюти по градове</span>
-    <span class="arrow">▼</span>
-  </button>
   <div class="city-index-body" id="city-index-body">
     <h2>Приюти за бездомни животни по градове в България</h2>
     <p class="city-index-intro">
@@ -1563,6 +1573,7 @@ function toggleAbout() {
   const open = body.classList.toggle('open');
   btn.classList.toggle('open', open);
   btn.setAttribute('aria-expanded', open);
+  if (open) closeSection('city-index-body', 'city-index-toggle');
 }
 
 function submitContact(e) {
@@ -1960,6 +1971,15 @@ function toggleCityIndex() {
   const open = body.classList.toggle('open');
   btn.classList.toggle('open', open);
   btn.setAttribute('aria-expanded', open);
+  if (open) closeSection('about-body', 'about-toggle');
+}
+
+function closeSection(bodyId, btnId) {
+  const body = document.getElementById(bodyId);
+  const btn = document.getElementById(btnId);
+  body.classList.remove('open');
+  btn.classList.remove('open');
+  btn.setAttribute('aria-expanded', 'false');
 }
 
 // ── City index (SEO section): grouped list of shelters per city ──
