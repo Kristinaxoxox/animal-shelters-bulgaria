@@ -1409,6 +1409,7 @@ function openPanel(idx) {
   let links = '';
   const allPhones = s.phones || (s.phone ? [s.phone] : []);
   allPhones.forEach(p => { links += `<a class="secondary" href="tel:${p}">📞 ${p}</a>`; });
+  if (s.email)     links += `<a class="secondary" href="mailto:${s.email}">✉️ ${s.email}</a>`;
   if (s.facebook)  links += `<a class="primary" href="${s.facebook}" target="_blank">Facebook</a>`;
   if (s.instagram) links += `<a class="primary" href="${s.instagram}" target="_blank">Instagram</a>`;
   if (s.website)   links += `<a class="primary" href="${s.website}" target="_blank">Уебсайт</a>`;
