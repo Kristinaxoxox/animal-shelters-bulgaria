@@ -252,14 +252,6 @@
        MAP
     ══════════════════════════════════ */
     html, body { background: #fdf5ec; }
-
-    /* Leaflet ships its own font stack — keep everything Montserrat */
-    .leaflet-container,
-    .leaflet-popup-content,
-    .leaflet-control-attribution,
-    .leaflet-control-zoom a {
-      font-family: 'Montserrat', sans-serif;
-    }
     #map { height: calc(100svh - var(--topbar-h, 115px)); width: 100%; position: relative; }
 
     /* Fullscreen map */
@@ -384,11 +376,7 @@
     /* Card front content */
     .card-image-wrap {
       position: relative; width: 100%; height: 190px;
-      overflow: hidden;
-      /* Let the photo give up some height when the text below needs it,
-         so long names never clip the card's bottom padding */
-      flex-shrink: 1;
-      min-height: 104px;
+      overflow: hidden; flex-shrink: 0;
       background: #f5d4ae;
     }
     .card-image-wrap img {
@@ -402,8 +390,7 @@
       background: linear-gradient(135deg, #cd6a18 0%, #a85412 100%);
       display: flex; align-items: center;
       justify-content: center; font-size: 2.5rem;
-      flex-shrink: 1;
-      min-height: 104px;
+      flex-shrink: 0;
     }
     /* Card image nav arrows */
     .card-img-arrow {
@@ -439,14 +426,17 @@
       font-size: 0.72rem; font-weight: 700;
       padding: 3px 9px; border-radius: 20px;
     }
-    .card-body { padding: 16px 18px 12px; flex: 1; display: flex; flex-direction: column; }
-    .card-name { font-size: 1rem; font-weight: 700; color: #cd6a18; margin-bottom: 4px; }
+    .card-body { padding: 16px 18px 12px; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .card-name {
+      font-size: 1rem; font-weight: 700; color: #cd6a18; margin-bottom: 4px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; line-height: 1.35; max-height: 2.7em;
+    }
     .card-city {
       font-size: 0.78rem; color: #888; margin-bottom: 10px;
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; max-height: 54px; overflow: hidden; }
     .card-tag {
       background: #fdf0e4; color: #cd6a18;
       border: 1px solid #e8b07a;
@@ -456,10 +446,14 @@
     .card-row {
       display: flex; align-items: flex-start;
       gap: 8px; margin-bottom: 8px;
-      font-size: 0.82rem; color: #444; line-height: 1.5;
+      font-size: 0.82rem; color: #444; line-height: 1.4;
+    }
+    .card-row-text {
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .card-row-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
-    .card-spacer { flex: 1; min-height: 8px; }
+    .card-spacer { flex: 1; min-height: 4px; }
     .card-flip-hint {
       font-size: 0.73rem; color: #cd6a18;
       text-align: right; opacity: 0.75;
@@ -699,35 +693,9 @@
       text-transform: uppercase; letter-spacing: 0.4px;
     }
     .donate-value {
-      font-family: 'Montserrat', sans-serif; font-size: 0.82rem;
+      font-family: 'Courier New', monospace; font-size: 0.82rem;
       color: #3a3a3a; word-break: break-all;
     }
-    /* IBANs: grouped digits, stronger weight, copy button */
-    .iban-value {
-      font-weight: 600;
-      letter-spacing: 0.4px;
-      font-variant-numeric: tabular-nums;
-      word-break: normal;
-      overflow-wrap: break-word;
-    }
-    .iban-copy {
-      display: inline-block;
-      margin-left: 6px;
-      padding: 2px 9px;
-      border: 1.5px solid #e8b07a;
-      border-radius: 12px;
-      background: #fff;
-      color: #cd6a18;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 700;
-      cursor: pointer;
-      vertical-align: 1px;
-      white-space: nowrap;
-      transition: background 0.15s, color 0.15s;
-    }
-    .iban-copy:hover { background: #fde8d0; }
-    .iban-copy.copied { background: #5a9e4c; border-color: #5a9e4c; color: #fff; }
     .donate-link {
       display: inline-block; padding: 6px 14px;
       background: #cd6a18; color: white;
@@ -763,7 +731,7 @@
       text-transform: uppercase; min-width: 52px; flex-shrink: 0; padding-top: 1px;
     }
     .card-donate-value {
-      font-family: 'Montserrat', sans-serif; font-size: 0.75rem;
+      font-family: 'Courier New', monospace; font-size: 0.75rem;
       word-break: break-all; color: #3a3a3a;
     }
 
@@ -866,26 +834,9 @@
         width: 100%;
         margin-left: 0;
         justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 8px;
-        min-width: 0;
       }
-      .shelter-count {
-        font-size: 0.75rem;
-        flex-shrink: 1;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .view-toggle { flex: 1 1 auto; min-width: 170px; max-width: 100%; }
-      .view-toggle button {
-        font-size: 0.78rem;
-        padding: 6px 8px;
-        flex: 1;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
+      .shelter-count { font-size: 0.75rem; }
+      .view-toggle button { font-size: 0.78rem; padding: 6px 12px; }
 
       /* ── Map ── */
       #map { height: calc(100svh - 136px); }
@@ -978,30 +929,13 @@
     @media (max-width: 640px) {
       .suggestion-title { font-size: 0.82rem; }
       .suggestion-sub { font-size: 0.70rem; }
-      /* Stack: icon + text + close on top, full-width button below,
-         so the text isn't squeezed into a narrow column */
-      .suggestion-inner { flex-wrap: wrap; align-items: flex-start; gap: 8px; }
-      .suggestion-btn {
-        order: 5;
-        flex: 1 1 100%;
-        padding: 8px 10px;
-        font-size: 0.8rem;
-        text-align: center;
-      }
+      .suggestion-btn { padding: 5px 10px; font-size: 0.75rem; }
     }
-
-    /* ── Section toggles row (contact + city index) ── */
-    .section-toggles {
-      display: flex;
-      background: #fff;
-      border-top: 1px solid #f5d4ae;
-    }
-    .section-toggles .about-toggle { flex: 1; min-width: 0; }
-    .section-toggles .about-toggle + .about-toggle { border-left: 1px solid #f5d4ae; }
 
     /* ── About section ── */
     .about-section {
       background: #fff;
+      border-top: 1px solid #f5d4ae;
     }
     .about-toggle {
       display: flex;
@@ -1113,55 +1047,6 @@
       .about-body.open { max-height: 900px; }
     }
 
-    /* ── City index (SEO section) ── */
-    .city-index {
-      background: #fff;
-    }
-    .city-index-body {
-      display: none;
-      padding: 32px 24px 48px;
-    }
-    .city-index-body.open { display: block; }
-    .city-index h2 {
-      text-align: center;
-      color: #3a2415;
-      font-size: 1.15rem;
-      margin-bottom: 12px;
-    }
-    .city-index-intro {
-      max-width: 640px;
-      margin: 0 auto 28px;
-      text-align: center;
-      font-size: 0.88rem;
-      color: #6b5b4b;
-      line-height: 1.6;
-    }
-    .city-index-grid {
-      max-width: 960px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 18px;
-    }
-    .city-index-city h3 {
-      font-size: 0.92rem;
-      color: #cd6a18;
-      margin-bottom: 6px;
-    }
-    .city-index-city ul { list-style: none; }
-    .city-index-city li {
-      font-size: 0.82rem;
-      line-height: 1.5;
-      margin-bottom: 6px;
-      color: #6b5b4b;
-    }
-    .city-index-city a {
-      color: #3a2415;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .city-index-city a:hover { color: #cd6a18; text-decoration: underline; }
-
     /* ── Footer ── */
     footer {
       background: #2a1400;
@@ -1193,12 +1078,6 @@
       header h1 { font-size: 0.8rem; }
       header p { display: none; }
       header img.logo { height: 40px; }
-      .controls { padding: 10px 8px; }
-      .filter-group label { font-size: 0.72rem; min-width: auto; }
-      .filter-group select { font-size: 0.76rem; padding: 7px 5px; }
-      .view-toggle button { font-size: 0.74rem; padding: 6px 5px; }
-      .toggle-emoji { display: none; }
-      .shelter-count { font-size: 0.72rem; }
     }
   </style>
   <script type="application/ld+json">
@@ -1282,8 +1161,8 @@
     <span class="shelter-count" id="shelterCount"></span>
     <button class="clear-filters-btn" id="clearFiltersBtn" onclick="clearFilters()" style="display:none;">✕ Изчисти филтри</button>
     <div class="view-toggle">
-      <button id="btn-map" class="active" onclick="setView('map')"><span class="toggle-emoji">🗺 </span>Карта</button>
-      <button id="btn-cat" onclick="setView('catalogue')"><span class="toggle-emoji">📋 </span>Справочник</button>
+      <button id="btn-map" class="active" onclick="setView('map')">🗺 Карта</button>
+      <button id="btn-cat" onclick="setView('catalogue')">📋 Справочник</button>
     </div>
   </div>
 </div>
@@ -1295,18 +1174,11 @@
 </div>
 <div id="catalogue"></div>
 
-<div class="section-toggles">
-  <button class="about-toggle" id="about-toggle" onclick="toggleAbout()" aria-expanded="false" aria-controls="about-body">
+<section class="about-section">
+  <button class="about-toggle" id="about-toggle" onclick="toggleAbout()" aria-expanded="false">
     <span>Свържи се с нас</span>
     <span class="arrow">▼</span>
   </button>
-  <button class="about-toggle" id="city-index-toggle" onclick="toggleCityIndex()" aria-expanded="false" aria-controls="city-index-body">
-    <span>Приюти по градове</span>
-    <span class="arrow">▼</span>
-  </button>
-</div>
-
-<section class="about-section">
   <div class="about-body" id="about-body">
     <div class="about-inner">
       <div class="contact-links">
@@ -1336,18 +1208,6 @@
       </form>
       <div class="contact-form-success" id="cf-success">✓ Съобщението е изпратено! Ще се свържем с теб скоро.</div>
     </div>
-  </div>
-</section>
-
-<section class="city-index" id="city-index">
-  <div class="city-index-body" id="city-index-body">
-    <h2>Приюти за бездомни животни по градове в България</h2>
-    <p class="city-index-intro">
-      Търсиш приют за кучета близо до теб — за осиновяване, разходка с куче или доброволчество?
-      Картата събира общински и частни приюти за безстопанствени животни в цялата страна,
-      с адреси, работно време, дни за разходки и контакти. Избери град от списъка:
-    </p>
-    <div class="city-index-grid" id="city-index-grid"></div>
   </div>
 </section>
 
@@ -1390,14 +1250,12 @@ let shelters = [];
 // ============================================================
 
 // ── Map setup ──
-// Bulgaria plus a generous buffer, so northern/southern shelters
-// (Видин, Силистра, Кърджали) can be panned to comfortably when zoomed in
 const bulgariaBounds = L.latLngBounds(
-  L.latLng(40.4, 21.0), L.latLng(45.1, 30.0)
+  L.latLng(41.23, 22.35), L.latLng(44.22, 28.68)
 );
 const map = L.map('map', {
   center: [42.7339, 25.4858], zoom: 7, minZoom: 6, maxZoom: 15,
-  maxBounds: bulgariaBounds, maxBoundsViscosity: 0.8,
+  maxBounds: bulgariaBounds, maxBoundsViscosity: 1.0,
   scrollWheelZoom: false
 });
 
@@ -1454,35 +1312,6 @@ function cardImgNav(shelterIdx, dir) {
 }
 
 // ── Donate helpers ──
-// Display IBANs in groups of 4, the way banks print them
-function formatIban(iban) {
-  return iban.replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
-}
-
-function copyIban(btn, iban) {
-  const plain = iban.replace(/\s+/g, '');
-  const done = () => {
-    const orig = btn.textContent;
-    btn.textContent = '✓ Копирано';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1600);
-  };
-  const fallback = () => {
-    const ta = document.createElement('textarea');
-    ta.value = plain;
-    ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try { if (document.execCommand('copy')) done(); } catch (_) {}
-    ta.remove();
-  };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(plain).then(done).catch(fallback);
-  } else {
-    fallback();
-  }
-}
-
 function buildDonatePanel(d) {
   if (!d) return '';
   const hasBank = d.iban || d.recipient || d.bank;
@@ -1490,7 +1319,7 @@ function buildDonatePanel(d) {
   if (!hasBank && !hasLinks) return '';
   let html = `<div class="donate-section"><div class="donate-section-title">Дарение</div>`;
   if (d.recipient) html += `<div class="donate-row"><span class="donate-label">Получател</span><span class="donate-value">${d.recipient}</span></div>`;
-  if (d.iban)      html += `<div class="donate-row"><span class="donate-label">IBAN</span><span class="donate-value iban-value">${formatIban(d.iban)} <button class="iban-copy" onclick="copyIban(this, '${d.iban}')">⧉ Копирай</button></span></div>`;
+  if (d.iban)      html += `<div class="donate-row"><span class="donate-label">IBAN</span><span class="donate-value">${d.iban}</span></div>`;
   if (d.bic)       html += `<div class="donate-row"><span class="donate-label">BIC</span><span class="donate-value">${d.bic}</span></div>`;
   if (d.bank)      html += `<div class="donate-row"><span class="donate-label">Банка</span><span class="donate-value">${d.bank}</span></div>`;
   if (d.note)      html += `<div class="donate-row"><span class="donate-label">Основание</span><span class="donate-value">${d.note}</span></div>`;
@@ -1510,7 +1339,7 @@ function buildDonateCard(d) {
   const s = 'font-size:0.72rem;padding:5px 11px;margin-top:4px;';
   let html = `<div class="card-donate"><div class="card-donate-title">Дарение</div>`;
   if (d.recipient) html += `<div class="card-donate-row"><span class="card-donate-label">Получател</span><span class="card-donate-value">${d.recipient}</span></div>`;
-  if (d.iban)      html += `<div class="card-donate-row"><span class="card-donate-label">IBAN</span><span class="card-donate-value iban-value">${formatIban(d.iban)} <button class="iban-copy" onclick="event.stopPropagation();copyIban(this, '${d.iban}')">⧉ Копирай</button></span></div>`;
+  if (d.iban)      html += `<div class="card-donate-row"><span class="card-donate-label">IBAN</span><span class="card-donate-value">${d.iban}</span></div>`;
   if (d.bic)       html += `<div class="card-donate-row"><span class="card-donate-label">BIC</span><span class="card-donate-value">${d.bic}</span></div>`;
   if (d.bank)      html += `<div class="card-donate-row"><span class="card-donate-label">Банка</span><span class="card-donate-value">${d.bank}</span></div>`;
   if (d.note)      html += `<div class="card-donate-row"><span class="card-donate-label">Основание</span><span class="card-donate-value">${d.note}</span></div>`;
@@ -1591,7 +1420,6 @@ function openPanel(idx) {
   let links = '';
   const allPhones = s.phones || (s.phone ? [s.phone] : []);
   allPhones.forEach(p => { links += `<a class="secondary" href="tel:${p}">📞 ${p}</a>`; });
-  if (s.email)     links += `<a class="secondary" href="mailto:${s.email}">✉️ ${s.email}</a>`;
   if (s.facebook)  links += `<a class="primary" href="${s.facebook}" target="_blank">Facebook</a>`;
   if (s.instagram) links += `<a class="primary" href="${s.instagram}" target="_blank">Instagram</a>`;
   if (s.website)   links += `<a class="primary" href="${s.website}" target="_blank">Уебсайт</a>`;
@@ -1642,10 +1470,6 @@ function scrollToMap() {
   window.addEventListener('load', syncHeight);
   syncHeight();
 
-  // Exposed for one-off re-syncs when the top bar changes height
-  // (e.g. the location suggestion banner is added or dismissed)
-  window.syncTopBarHeight = syncHeight;
-
   window.addEventListener('scroll', function() {
     header.classList.toggle('header-hidden', window.scrollY > 10);
   }, { passive: true });
@@ -1660,7 +1484,6 @@ function toggleAbout() {
   const open = body.classList.toggle('open');
   btn.classList.toggle('open', open);
   btn.setAttribute('aria-expanded', open);
-  if (open) closeSection('city-index-body', 'city-index-toggle');
 }
 
 function submitContact(e) {
@@ -1700,8 +1523,8 @@ let _pagedList = [];
 
 function cardsPerPage() {
   const w = window.innerWidth;
-  if (w <= 640) return 10;
-  if (w <= 900) return 12;
+  if (w <= 640) return 4;
+  if (w <= 900) return 8;
   return 12;
 }
 
@@ -1793,7 +1616,7 @@ function buildCard(s) {
             <div class="card-name">${s.name}</div>
             <div class="card-city">📍 ${s.city} — ${s.address}</div>
             <div class="card-tags">${days}</div>
-            <div class="card-row"><span class="card-row-icon">🕙</span>${s.walkTime}</div>
+            <div class="card-row"><span class="card-row-icon">🕙</span><span class="card-row-text">${s.walkTime}</span></div>
             <div class="card-spacer"></div>
             <div class="card-flip-hint">Натисни за детайли →</div>
           </div>
@@ -1902,21 +1725,15 @@ function showSuggestion(s, idx, distKm, today, hasWalksToday) {
     <div class="suggestion-inner">
       <div class="suggestion-icon">📍</div>
       <div class="suggestion-text">
-        <div class="suggestion-title">${hasWalksToday ? 'Най-близкият приют с разходки днес е' : 'Най-близкият приют до теб е'} <strong>${s.name}</strong></div>
+        <div class="suggestion-title">Най-близкият приют до теб е <strong>${s.name}</strong></div>
         <div class="suggestion-sub">${s.city} · ${dist} от теб · ${walksNote}</div>
       </div>
       <button class="suggestion-btn" onclick="openPanel(${idx})">Виж →</button>
-      <button class="suggestion-close" onclick="dismissSuggestion()">✕</button>
+      <button class="suggestion-close" onclick="document.getElementById('suggestion-banner').remove()">✕</button>
     </div>`;
 
   document.querySelector('.controls').after(banner);
-  window.syncTopBarHeight();
-}
-
-function dismissSuggestion() {
-  const banner = document.getElementById('suggestion-banner');
-  if (banner) banner.remove();
-  window.syncTopBarHeight();
+  if (currentView === 'map') map.setView([s.lat, s.lng], 11);
 }
 
 function handleLocation(lat, lng) {
@@ -1929,6 +1746,23 @@ function handleLocation(lat, lng) {
   // Prefer nearest shelter with walks today, otherwise nearest overall
   const best = ranked.find(r => r.s.walkDays.includes(today)) || ranked[0];
   const idx  = shelters.indexOf(best.s);
+
+  // Instantly update all three filters
+  document.getElementById('dayFilter').value  = today;
+  document.getElementById('cityFilter').value = best.s.city;
+  document.getElementById('searchInput').value = '';
+  applyFilters();
+
+  // Briefly flash the shelter count so the user notices it updated
+  const countEl = document.getElementById('shelterCount');
+  countEl.style.transition = 'none';
+  countEl.style.color = '#cd6a18';
+  countEl.style.fontWeight = '700';
+  setTimeout(() => {
+    countEl.style.transition = 'color 0.8s, font-weight 0.8s';
+    countEl.style.color = '';
+    countEl.style.fontWeight = '';
+  }, 900);
 
   showSuggestion(best.s, idx, best.dist, today, best.s.walkDays.includes(today));
 }
@@ -2041,43 +1875,6 @@ function injectShelterListSchema(list) {
   document.head.appendChild(script);
 }
 
-function toggleCityIndex() {
-  const body = document.getElementById('city-index-body');
-  const btn = document.getElementById('city-index-toggle');
-  const open = body.classList.toggle('open');
-  btn.classList.toggle('open', open);
-  btn.setAttribute('aria-expanded', open);
-  if (open) closeSection('about-body', 'about-toggle');
-}
-
-function closeSection(bodyId, btnId) {
-  const body = document.getElementById(bodyId);
-  const btn = document.getElementById(btnId);
-  body.classList.remove('open');
-  btn.classList.remove('open');
-  btn.setAttribute('aria-expanded', 'false');
-}
-
-// ── City index (SEO section): grouped list of shelters per city ──
-function buildCityIndex(list) {
-  const byCity = {};
-  list.forEach((s, idx) => {
-    (byCity[s.city] = byCity[s.city] || []).push({ s, idx });
-  });
-  const cities = Object.keys(byCity).sort((a, b) => a.localeCompare(b));
-  document.getElementById('city-index-grid').innerHTML = cities.map(city => `
-    <div class="city-index-city">
-      <h3>Приюти за животни — ${city}</h3>
-      <ul>
-        ${byCity[city].map(({ s, idx }) => {
-          const walk = s.walkDays && s.walkDays.length
-            ? ` Дни за разходки: ${s.walkDays.join(', ').toLowerCase()}.` : '';
-          return `<li><a href="#city-index" onclick="openPanel(${idx});return false;">${s.name}</a> — ${s.address}.${walk}</li>`;
-        }).join('')}
-      </ul>
-    </div>`).join('');
-}
-
 fetch('shelters.json').then(r => r.json()).then(data => {
   shelters = data.sort((a,b) => a.name.localeCompare(b.name));
   shelters.forEach(s => {
@@ -2098,7 +1895,6 @@ fetch('shelters.json').then(r => r.json()).then(data => {
   setView(localStorage.getItem('shelterView') || 'map');
   detectLocation();
   injectShelterListSchema(shelters);
-  buildCityIndex(shelters);
 }).catch(e => {
   console.error('Failed to load shelters.json:', e);
   document.getElementById('map').innerHTML = `

@@ -426,10 +426,17 @@
       font-size: 0.72rem; font-weight: 700;
       padding: 3px 9px; border-radius: 20px;
     }
-    .card-body { padding: 16px 18px 12px; flex: 1; display: flex; flex-direction: column; }
-    .card-name { font-size: 1rem; font-weight: 700; color: #cd6a18; margin-bottom: 4px; }
-    .card-city { font-size: 0.78rem; color: #888; margin-bottom: 10px; }
-    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .card-body { padding: 16px 18px 12px; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .card-name {
+      font-size: 1rem; font-weight: 700; color: #cd6a18; margin-bottom: 4px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; line-height: 1.35; max-height: 2.7em;
+    }
+    .card-city {
+      font-size: 0.78rem; color: #888; margin-bottom: 10px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; max-height: 54px; overflow: hidden; }
     .card-tag {
       background: #fdf0e4; color: #cd6a18;
       border: 1px solid #e8b07a;
@@ -439,10 +446,14 @@
     .card-row {
       display: flex; align-items: flex-start;
       gap: 8px; margin-bottom: 8px;
-      font-size: 0.82rem; color: #444; line-height: 1.5;
+      font-size: 0.82rem; color: #444; line-height: 1.4;
+    }
+    .card-row-text {
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .card-row-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
-    .card-spacer { flex: 1; min-height: 8px; }
+    .card-spacer { flex: 1; min-height: 4px; }
     .card-flip-hint {
       font-size: 0.73rem; color: #cd6a18;
       text-align: right; opacity: 0.75;
@@ -1605,7 +1616,7 @@ function buildCard(s) {
             <div class="card-name">${s.name}</div>
             <div class="card-city">📍 ${s.city} — ${s.address}</div>
             <div class="card-tags">${days}</div>
-            <div class="card-row"><span class="card-row-icon">🕙</span>${s.walkTime}</div>
+            <div class="card-row"><span class="card-row-icon">🕙</span><span class="card-row-text">${s.walkTime}</span></div>
             <div class="card-spacer"></div>
             <div class="card-flip-hint">Натисни за детайли →</div>
           </div>
